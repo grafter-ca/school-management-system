@@ -1,7 +1,12 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+// next.config.js
+module.exports = {
+  experimental: { appDir: true },
+  async rewrites() {
+    return [
+      {
+        source: "/uploads/:path*",
+        destination: "/uploads/:path*",
+      },
+    ];
+  },
 };
-
-export default nextConfig;
