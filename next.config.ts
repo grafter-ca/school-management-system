@@ -6,7 +6,6 @@ const withPWA = require("next-pwa")({
 });
 
 module.exports = withPWA({
-   turbopack: {}, // empty turbopack config
   async rewrites() {
     return [
       {
