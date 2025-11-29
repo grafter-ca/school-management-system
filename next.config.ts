@@ -1,6 +1,5 @@
 // next.config.js
 module.exports = {
-  experimental: { appDir: true },
   async rewrites() {
     return [
       {
