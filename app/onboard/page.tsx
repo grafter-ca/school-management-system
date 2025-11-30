@@ -12,7 +12,7 @@ interface DashboardProps {
   onLogout: () => void;
 }
 
-export default function Dashboard({ onLogout }: DashboardProps) {
+ function Dashboard({ onLogout }: DashboardProps) {
   const [schools, setSchools] = useState<SchoolTableProps[]>([
     {
       id: 'AUTO-001',
@@ -134,3 +134,5 @@ export default function Dashboard({ onLogout }: DashboardProps) {
     </div>
   );
 }
+
+export default Dashboard;
