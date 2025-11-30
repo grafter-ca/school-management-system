@@ -9,7 +9,7 @@ const pool = new Pool({
   port: Number(process.env.PG_PORT),
   ssl:
     process.env.PG_SSL === "true"
-      ? { rejectUnauthorized: false } // Neon requires SSL
+      ? { rejectUnauthorized: false } 
       : false,
 });
 

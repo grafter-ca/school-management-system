@@ -4,7 +4,7 @@ import { Mail, ArrowLeft, CheckCircle, Lock, BookOpen } from 'lucide-react';
 
  interface LoginFormProps {
     onForgotPassword:()=>void;
-    onLogin:()=>void;
+    onLogin:(email: string, password: string)=>void;
   }
 
 export default function login({onForgotPassword, onLogin}: LoginFormProps) {
