@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
       email: user.email,
       sms_role: user.sms_role,
     },
+    token:token,
   });
 
   response.cookies.set({

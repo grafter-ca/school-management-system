@@ -10,9 +10,26 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle password reset logic here
+    try {
+    const res = await fetch("https://school-management-system-indol.vercel.app/api/users/reset-password-request", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Something went wrong");
+    }
+
+    setIsSubmitted(true);
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    alert("Error sending reset email.");
+  }
     console.log('Password reset request for:', email);
     setIsSubmitted(true);
   };
