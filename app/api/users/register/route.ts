@@ -26,5 +26,5 @@ export async function POST(req: NextRequest) {
   // Optional: generate JWT for initial session
   const token = signToken({ id: user.id, email: user.email });
 
-  return NextResponse.json({ user, token });
+  return NextResponse.json({ message:"Verification Link Sent!",user, token });
 }
