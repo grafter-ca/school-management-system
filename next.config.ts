@@ -3,14 +3,12 @@ const withPWA = require("next-pwa")({
   register: true,
   skipWaiting: true,
   // disable: process.env.NODE_ENV === "development",
-   disable: false, // allowPWA in both dev and prod
-
+  disable: false, // allowPWA in both dev and prod
 });
 
 module.exports = withPWA({
-  experimental: {
-    appDir: true, // enable App Router
-  },
+  reactStrictMode: true,
+  turbopack: {}, // avoid turbopack error
   async rewrites() {
     return [
       {

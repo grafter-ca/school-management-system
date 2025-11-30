@@ -1,28 +1,30 @@
-import type { Metadata } from 'next';
-import '@/app/globals.css';
+// app/layout.tsx
+import type { Metadata } from "next";
+import "@/app/globals.css";
 
-// Metadata
 export const metadata: Metadata = {
-  title: 'School Onboarding Portal',
-  description: 'Onboarding officer portal for school management',
-  keywords: ['school', 'onboarding', 'education', 'management'],
-  authors: [{ name: 'Your Name' }],
+  title: "School Onboarding Portal",
+  description: "Onboarding officer portal for school management",
+  keywords: ["school", "onboarding", "education", "management"],
+  authors: [{ name: "Your Name" }],
+  manifest: "/manifest.json",
+  themeColor: "#1e40af",
+  icons: {
+    icon: "/icons/icon-192x192.png",
+    apple: "/icons/icon-192x192.png",
+  },
 };
 
-// PWAHead component
 function PWAHead() {
   return (
     <>
-      <link rel="manifest" href="/manifest.json" />
-      <meta name="theme-color" content="#1e40af" />
-      <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      <link rel="mask-icon" href="/icons/safari-pinned-tab.webp" color="#1e40af" />
     </>
   );
 }
 
-// Root Layout
 export default function RootLayout({
   children,
 }: {
@@ -30,6 +32,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* PWA extra tags */}
+        <PWAHead />
+      </head>
+
       <body className="antialiased" suppressHydrationWarning>
         {children}
       </body>
