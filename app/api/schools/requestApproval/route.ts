@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
-import { sendApprovalRequest } from "@/lib/resend";
+import { sendApprovalRequest } from "@/lib/sendApprovalRequest";
 
 
 // request approval 
