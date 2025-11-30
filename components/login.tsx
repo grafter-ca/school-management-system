@@ -7,7 +7,7 @@ import { Mail, ArrowLeft, CheckCircle, Lock, BookOpen } from 'lucide-react';
     onLogin:(email: string, password: string)=>void;
   }
 
-export default function login({onForgotPassword, onLogin}: LoginFormProps) {
+export default function Login({onForgotPassword, onLogin}: LoginFormProps) {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [mounted, setMounted] = useState(false)
 
@@ -25,19 +25,22 @@ export default function login({onForgotPassword, onLogin}: LoginFormProps) {
         {showForgotPassword ? (
           <ForgotPasswordForm onBack={() => setShowForgotPassword(false)} />
         ) : (
-          <LoginForm onForgotPassword={() => setShowForgotPassword(true)} />
+          <LoginForm onForgotPassword={() => setShowForgotPassword(true)} 
+          onLogin={onLogin}
+          />
         )}
       </div>
     </div>
   );
 }
 
-function LoginForm({ onForgotPassword }: { onForgotPassword: () => void }) {
+function LoginForm({ onForgotPassword, onLogin }: { onForgotPassword: () => void; 
+  onLogin:(email: string, password: string)=> void, }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = () => {
-    console.log('Login attempt:', email);
+    onLogin(email, password)
   };
 
   return (
