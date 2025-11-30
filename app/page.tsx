@@ -11,7 +11,7 @@ export default function LoginPage() {
     console.log('Logging in:', email, password);
 
     try {
-      const res = await fetch('/api/proxy-login', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/proxy-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

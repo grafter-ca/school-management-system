@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const res = await fetch(
-      'https://school-management-system-indol.vercel.app/api/users/login',
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/users/login`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
