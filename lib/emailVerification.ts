@@ -14,7 +14,7 @@ export async function sendVerificationEmail(name: string, email: string, userId:
 
     // Send email via Resend
     const data = await resend.emails.send({
-      from: "callebhabyar55@gmail.com",
+      from: "sandbox@resend.dev",
       to: email,
       subject: "Verify Your Account",
       html: `

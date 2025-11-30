@@ -22,7 +22,7 @@ export async function sendApprovalRequest(
 
   try {
     const data = await resend.emails.send({
-      from: "callebhabyar55@gmail.com",
+      from: "sandbox@resend.dev",
       to,
       subject: `Approval Request: ${schoolName}`,
       html: `
