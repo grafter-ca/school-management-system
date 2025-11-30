@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
-import { sendApprovalRequest } from "@/lib/resend";
+import { sendApprovalRequest } from "@/lib/sendApprovalRequest";
 
-export async function PATCH(req: Request) {
+
+// request approval 
+///PUT METHOS
+//
+export async function PUT(req: Request) {
   try {
     const { schoolId } = await req.json();
     if (!schoolId) {
@@ -14,7 +18,6 @@ export async function PATCH(req: Request) {
       `UPDATE schools SET status = 'PENDING' WHERE school_id = $1 RETURNING *`,
       [schoolId]
     );
-
     const school = rows[0];
     if (!school) return NextResponse.json({ error: "School not found" }, { status: 404 });
 
