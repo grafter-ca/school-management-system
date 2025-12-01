@@ -1,40 +1,40 @@
-//school promps
-export interface SchoolProps {
+export type SchoolStatus = 'Draft' | 'Pending Approval' | 'Approved' | 'Rejected';
+
+export interface School {
   id: string;
   schoolName: string;
   schoolEmail: string;
   schoolPhone: string;
-  schoolAddress: string;
-  type: string;
-  district: string;
-  province: string;
-  numberOfStudents: number;
-  numberOfTeachers: number;
-  subscriptionYear: number;
+  level: string;
+  type:string;
+  numberOfStudents?: number;
+  subscription: string;
+  region: string;
+  district?: string;
+  sector: string;
+  cell: string;
+  village: string;
+  // Part 2: Headmaster Information
+  headmasterName: string;
+  headmasterEmail: string;
+  headmasterPhone: string;
+  // Part 3: Documents
   registrationCertificate: File | null;
-  schoolLicense: File | null;
-  otherDocuments: File | null;
-  invoice: File | null;
-  status: string;
+  paymentProof: File | null;
+  // Metadata
+  registrationDate: string;
+  status: SchoolStatus;
+  rejectionReason?: string;
 }
 
-// table prompts
-
-export interface SchoolTableProps {
-  id: string;
-  schoolName: string;
-  schoolEmail: string;
-  schoolPhone: string;
-  schoolAddress: string;
-  type: string;
-  district: string;
-  province: string;
-  numberOfStudents: number;
-  numberOfTeachers: number;
-  subscriptionYear: number;
-  registrationCertificate: File | null;
-  schoolLicense: File | null;
-  otherDocuments: File | null;
-  invoice: File | null;
-  status: string;
+export interface LocationData {
+  [region: string]: {
+    [district: string]: {
+      [sector: string]: {
+        [cell: string]: string[];
+      };
+    };
+  };
 }
+
+export type UserRole = 'onboarding' | 'compliance';

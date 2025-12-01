@@ -1,6 +1,5 @@
-import { GraduationCap, LogOut, Bell, User } from 'lucide-react';
 
-// In a real Next.js project, this would be in: /components/layout/Navbar.tsx
+import { GraduationCap, LogOut, Bell, User } from 'lucide-react';
 interface NavbarProps {
   onLogout: () => void;
 }

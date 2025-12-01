@@ -3,6 +3,9 @@
 import LoginForm from '@/components/login';
 
 export default function LoginPage() {
+
+console.log("Api url", process.env.NEXT_PUBLIC_APP_URL)
+
   const handleForgotPassword = async () => {
     console.log('Forgot password clicked');
   };
@@ -11,11 +14,12 @@ export default function LoginPage() {
     console.log('Logging in:', email, password);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/proxy-login`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
+
 
       console.log('Response status:', res.status);
       console.log('Response ok:', res.ok);
@@ -27,7 +31,7 @@ export default function LoginPage() {
       if (res.ok && !data.error) {
         console.log('Login successful, redirecting...');
         // Login successful → redirect to dashboard
-        window.location.href = '/onboard/dashboard';
+        window.location.href = '/onboard';
       } else {
         // Show error if login failed
         console.error('Login failed:', data.error);

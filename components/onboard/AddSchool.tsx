@@ -1,31 +1,34 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { Upload, X, FileText, ArrowLeft, GraduationCap, Plus } from 'lucide-react';
-import { SchoolProps } from '@/types/index';
+import { School } from '@/types/index';
 import AddSchoolForm from './AddSchoolForm';
 
 
 export default function AddSchool() {
-  const [schools, setSchools] = useState<SchoolProps[]>([]);
+  const [schools, setSchools] = useState<School[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [editingSchool, setEditingSchool] = useState<SchoolProps | null>(null);
+  const [editingSchool, setEditingSchool] = useState<School | null>(null);
 
-  const handleAddSchool = (schoolData: Omit<SchoolProps, 'id' | 'status'>) => {
-    const newSchool: SchoolProps = {
+  // Accept the type expected by AddSchoolForm: omit status, id, registrationDate
+  const handleAddSchool = (schoolData: Omit<School, 'id' | 'status' | 'registrationDate'>) => {
+    const newSchool: School = {
       ...schoolData,
       id: Date.now().toString(),
-      status: 'Pending'
+      registrationDate: new Date().toISOString(),
+      status: 'Pending Approval' // use the allowed union member
     };
     setSchools([...schools, newSchool]);
     setShowForm(false);
     setEditingSchool(null);
   };
 
-  const handleEditSchool = (schoolData: Omit<SchoolProps, 'id' | 'status'>) => {
+  // same for edit: incoming data won't contain registrationDate, preserve it from editingSchool
+  const handleEditSchool = (schoolData: Omit<School, 'id' | 'status' | 'registrationDate'>) => {
     if (editingSchool) {
-      setSchools(schools.map(s => 
-        s.id === editingSchool.id 
-          ? { ...schoolData, id: s.id, status: s.status }
+      setSchools(schools.map(s =>
+        s.id === editingSchool.id
+          ? { ...s, ...schoolData } // preserve id, status, registrationDate from s
           : s
       ));
       setShowForm(false);
@@ -33,7 +36,7 @@ export default function AddSchool() {
     }
   };
 
-  const handleEdit = (school: SchoolProps) => {
+  const handleEdit = (school: School) => {
     setEditingSchool(school);
     setShowForm(true);
   };
@@ -81,7 +84,7 @@ export default function AddSchool() {
                   </div>
                   <div className="space-y-2 text-sm text-gray-600 mb-4">
                     <p>📧 {school.schoolEmail}</p>
-                    <p>📍 {school.district}, {school.province}</p>
+                    <p>📍 {school.district}, {school.region}</p>
                     <p>👥 {school.numberOfStudents} students</p>
                   </div>
                   <button
