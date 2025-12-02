@@ -6,7 +6,7 @@ import { sendApprovalRequest } from "@/lib/sendApprovalRequest";
 // request approval 
 ///PUT METHOS
 //
-export async function PUT(req: Request) {
+export async function PATCH(req: Request) {
   try {
     const { schoolId } = await req.json();
     if (!schoolId) {

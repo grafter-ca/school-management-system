@@ -93,6 +93,7 @@ export async function PUT(
       "headmaster_name",
       "headmaster_email",
       "headmaster_phone",
+      "rejectMessage"
     ];
 
     const textUpdates: any = {};

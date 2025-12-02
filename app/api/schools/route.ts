@@ -2,7 +2,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { v4 as uuidv4 } from "uuid";
-import { uploadSingleFileCloud, UploadedFile } from "@/middleware/uploadSingleCloud";
+import {
+  uploadSingleFileCloud,
+  UploadedFile,
+} from "@/middleware/uploadSingleCloud";
 
 // Disable Next.js body parser for FormData
 export const config = { api: { bodyParser: false } };
@@ -12,7 +15,9 @@ export const config = { api: { bodyParser: false } };
 // -----------------------------
 export async function GET() {
   try {
-    const { rows } = await pool.query(`SELECT * FROM "School" ORDER BY created_at DESC`);
+    const { rows } = await pool.query(
+      `SELECT * FROM "School" ORDER BY created_at DESC`
+    );
     return NextResponse.json(rows);
   } catch (err: any) {
     console.error("GET Error:", err);
@@ -47,7 +52,21 @@ export async function POST(req: NextRequest) {
       headmaster_name: formData.get("headmaster_name") as string,
       headmaster_email: formData.get("headmaster_email") as string,
       headmaster_phone: formData.get("headmaster_phone") as string,
+      reject_message: formData.get("reject_message") as string,
     };
+
+    // check if school already exit
+    const existingSchool = await pool.query(
+      `SELECT * FROM "School" WHERE school_email = $1`,
+      [fields.school_email]
+    );
+
+    if (existingSchool.rows.length > 0) {
+      return NextResponse.json(
+        { error: "A school with this email already exists." },
+        { status: 400 }
+      );
+    }
 
     // Uploadable file fields
     const fileUploads: any = {
@@ -74,11 +93,11 @@ export async function POST(req: NextRequest) {
         district, province, number_of_students, number_of_teachers,
         subscription_year, level, cell, sector, village, registration_date,
         headmaster_name, headmaster_email, headmaster_phone,
-        registration_certificate, payment_proof, invoice, other_documents
+        registration_certificate, payment_proof, invoice, other_documents,reject_message
       )
       VALUES (
         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
-        $19,$20,$21,$22
+        $19,$20,$21,$22,$23
       )
       RETURNING *`,
       [
@@ -104,6 +123,7 @@ export async function POST(req: NextRequest) {
         fileUploads.payment_proof,
         fileUploads.invoice,
         fileUploads.other_documents,
+        fileUploads.reject_message,
       ]
     );
 
