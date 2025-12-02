@@ -24,7 +24,7 @@ export function ViewSchoolModal({ school, onClose, onRequestApproval, userRole }
   const canRequestApproval = userRole === 'onboarding' && (school.status === 'Draft' || school.status === 'Rejected');
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-white bg-transparent-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 flex items-center justify-between z-10">
           <h2 className="text-gray-900">School Information</h2>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import  Navbar  from '@/components/onboard/Navbar';
 import { SchoolsTable } from '@/components/onboard/SchoolsTable';
 import { ComplianceViewModal } from '@/components/compliance/ComplianceViewModel';
@@ -11,99 +11,48 @@ interface ComplianceDashboardProps {
 }
 
 export default function ComplianceDashboard({ onLogout }: ComplianceDashboardProps) {
-  // In a real app, this would come from a shared data source
-  const [schools, setSchools] = useState<School[]>([
-    {
-      id: 'SCH-P-2025-1001',
-      schoolName: 'ABC School',
-      schoolEmail: 'info@abcschool.edu',
-      type: 'Public',
-      schoolPhone: '+250788123456',
-      level: 'Primary',
-      numberOfStudents: 500,
-      subscription: 'Standard',
-      region: 'Kigali City',
-      district: 'Gasabo',
-      sector: 'Bumbogo',
-      cell: 'Gifata',
-      village: 'Kajevuba',
-      headmasterName: 'John Doe',
-      headmasterEmail: 'john.doe@abcschool.edu',
-      headmasterPhone: '+250788111222',
-      registrationCertificate: null,
-      paymentProof: null,
-      registrationDate: '2025-01-15',
-      status: 'Pending Approval',
-    },
-    {
-      id: 'SCH-S-2025-2045',
-      schoolName: 'XYZ School',
-      schoolEmail: 'contact@xyzschool.edu',
-      type: 'Public',
-      schoolPhone: '+250788654321',
-      level: 'Secondary',
-      numberOfStudents: 750,
-      subscription: 'Premium',
-      region: 'Eastern Province',
-      district: 'Kayonza',
-      sector: 'Gahini',
-      cell: 'Kahi',
-      village: 'Gahini',
-      headmasterName: 'Jane Smith',
-      headmasterEmail: 'jane.smith@xyzschool.edu',
-      headmasterPhone: '+250788333444',
-      registrationCertificate: null,
-      paymentProof: null,
-      registrationDate: '2025-01-20',
-      status: 'Approved',
-    },
-    {
-      id: 'SCH-N-2025-3567',
-      schoolName: 'Little Stars Nursery',
-      schoolEmail: 'info@littlestars.edu',
-      type: 'Public',
-      schoolPhone: '+250788987654',
-      level: 'Nursery',
-      numberOfStudents: 120,
-      subscription: 'Basic',
-      region: 'Southern Province',
-      district: 'Huye',
-      sector: 'Ngoma',
-      cell: 'Cyarwa',
-      village: 'Matyazo',
-      headmasterName: 'Marie Uwase',
-      headmasterEmail: 'marie@littlestars.edu',
-      headmasterPhone: '+250788555666',
-      registrationCertificate: null,
-      paymentProof: null,
-      registrationDate: '2025-01-18',
-      status: 'Pending Approval',
-    },
-  ]);
+ 
+  const [schools, setSchools] = useState<School[]>([]);
 
   const [viewingSchool, setViewingSchool] = useState<School | null>(null);
 
-  const handleApprove = (schoolId: string) => {
-    setSchools(
-      schools.map((s) =>
-        s.id === schoolId ? { ...s, status: 'Approved' as const, rejectionReason: undefined } : s
-      )
-    );
+  const fetchPendingSchools = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/schools?status=Pending Approval");
+      const data = await res.json();
+      setSchools(data);
+    } catch (error) {
+      console.error("Error fetching pending schools:", error);
+    }
   };
 
-  const handleReject = (schoolId: string, reason: string) => {
-    setSchools(
-      schools.map((s) =>
-        s.id === schoolId ? { ...s, status: 'Rejected' as const, rejectionReason: reason } : s
-      )
-    );
+  useEffect(() => {
+    fetchPendingSchools();
+  }, []);
+
+  const handleApprove = async(schoolId: string) => {
+    await fetch(`http://localhost:5000/api/schools/${schoolId}/status`, {
+      method: "PATCH",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({status: "Approved"}),
+    });
+    fetchPendingSchools();
+  };
+
+  const handleReject = async (schoolId: string, reason: string) => {
+    await fetch(`http://localhost:5000/api/schools/${schoolId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "Rejected", rejectionReason: reason }),
+    });
+    fetchPendingSchools();
   };
 
   const handleViewSchool = (school: School) => {
     setViewingSchool(school);
   };
 
-  const pendingCount = schools.filter(s => s.status === 'Pending Approval').length;
+  const pendingCount = schools.length;
 
   return (
     <div className="min-h-screen bg-gray-50">

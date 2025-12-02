@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
 
   // Protect ALL routes starting with /onboard
-  const isProtectedRoute = request.nextUrl.pathname.startsWith("/compliance");
+  const isProtectedRoute = request.nextUrl.pathname.startsWith("/onboard");
 
   if (isProtectedRoute) {
     if (!token) {

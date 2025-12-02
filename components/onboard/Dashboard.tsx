@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import  Navbar  from './Navbar';
 import { SchoolsTable } from './SchoolsTable';
 import  AddSchoolForm  from './AddSchoolForm';
@@ -14,74 +14,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ onLogout }: DashboardProps) {
-  const [schools, setSchools] = useState<School[]>([
-    {
-      id: 'SCH-P-2025-1001',
-      schoolName: 'ABC School',
-      type: 'Public',
-      schoolEmail: 'info@abcschool.edu',
-      schoolPhone: '+250788123456',
-      level: 'Primary',
-      numberOfStudents: 500,
-      subscription: 'Standard',
-      region: 'Kigali City',
-      district: 'Gasabo',
-      sector: 'Bumbogo',
-      cell: 'Gifata',
-      village: 'Kajevuba',
-      headmasterName: 'John Doe',
-      headmasterEmail: 'john.doe@abcschool.edu',
-      headmasterPhone: '+250788111222',
-      registrationCertificate: null,
-      paymentProof: null,
-      registrationDate: '2025-01-15',
-      status: 'Draft',
-    },
-    {
-      id: 'SCH-S-2025-2045',
-      schoolName: 'XYZ School',
-      type: 'Public',
-      schoolEmail: 'contact@xyzschool.edu',
-      schoolPhone: '+250788654321',
-      level: 'Secondary',
-      numberOfStudents: 750,
-      subscription: 'Premium',
-      region: 'Eastern Province',
-      district: 'Kayonza',
-      sector: 'Gahini',
-      cell: 'Kahi',
-      village: 'Gahini',
-      headmasterName: 'Jane Smith',
-      headmasterEmail: 'jane.smith@xyzschool.edu',
-      headmasterPhone: '+250788333444',
-      registrationCertificate: null,
-      paymentProof: null,
-      registrationDate: '2025-01-20',
-      status: 'Approved',
-    },
-    {
-      id: 'SCH-N-2025-3567',
-      schoolName: 'Little Stars Nursery',
-      type: 'Public',
-      schoolEmail: 'info@littlestars.edu',
-      schoolPhone: '+250788987654',
-      level: 'Nursery',
-      numberOfStudents: 120,
-      subscription: 'Basic',
-      region: 'Southern Province',
-      district: 'Huye',
-      sector: 'Ngoma',
-      cell: 'Cyarwa',
-      village: 'Matyazo',
-      headmasterName: 'Marie Uwase',
-      headmasterEmail: 'marie@littlestars.edu',
-      headmasterPhone: '+250788555666',
-      registrationCertificate: null,
-      paymentProof: null,
-      registrationDate: '2025-01-18',
-      status: 'Pending Approval',
-    },
-  ]);
+  const [schools, setSchools] = useState<School[]>([]);
   
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingSchool, setEditingSchool] = useState<School | null>(null);
@@ -93,7 +26,21 @@ export default function Dashboard({ onLogout }: DashboardProps) {
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
 
-  const handleAddSchool = (school: Omit<School, 'id' | 'status' | 'registrationDate'>) => {
+  const fetchSchools = async () => {
+    try {
+      const res = await fetch('')
+      const data = await res.json();
+      setSchools(data);
+    } catch (error) {
+      console.error("Failed to fetch:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSchools();
+  }, []);
+
+  const handleAddSchool = async (school: Omit<School, 'id' | 'status' | 'registrationDate'>) => {
     const registrationYear = new Date().getFullYear();
     const existingIds = schools.map(s => s.id);
     const schoolId = generateSchoolId(school.level, registrationYear, existingIds);
@@ -104,8 +51,14 @@ export default function Dashboard({ onLogout }: DashboardProps) {
       status: 'Draft',
       registrationDate: new Date().toISOString().split('T')[0],
     };
-    setSchools([...schools, newSchool]);
-    setShowAddForm(false);
+    await fetch('', {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body:JSON.stringify(newSchool)
+    })
+
+    fetchSchools();
+    setShowAddForm(false)
   };
 
   const handleEditSchool = (school: School) => {
@@ -116,31 +69,28 @@ export default function Dashboard({ onLogout }: DashboardProps) {
     }
   };
 
-  const handleUpdateSchool = (updatedSchool: Omit<School, 'id' | 'status' | 'registrationDate'>) => {
+  const handleUpdateSchool = async (updatedSchool: Omit<School, 'id' | 'status' | 'registrationDate'>) => {
     if (editingSchool) {
-      setSchools(
-        schools.map((s) =>
-          s.id === editingSchool.id
-            ? { 
-                ...updatedSchool, 
-                id: editingSchool.id, 
-                status: 'Draft',
-                registrationDate: editingSchool.registrationDate
-              }
-            : s
-        )
-      );
+      await fetch(`http://localhost:5000/api/schools/${editingSchool.id}`, {
+        method: "PUT",
+        headers: {"content-type": "application/json"},
+        body: JSON.stringify(updatedSchool)
+      });
+
+      fetchSchools();
       setEditingSchool(null);
       setShowAddForm(false);
     }
   };
 
-  const handleRequestApproval = (schoolId: string) => {
-    setSchools(
-      schools.map((s) =>
-        s.id === schoolId ? { ...s, status: 'Pending Approval' as const } : s
-      )
-    );
+  const handleRequestApproval = async (schoolId: string) => {
+   await fetch(`http://localhost:5000/api/schools/${schoolId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "Pending Approval" }),
+    });
+
+    fetchSchools();
   };
 
   const handleCancelForm = () => {
