@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   keywords: ["school", "onboarding", "education", "management"],
   authors: [{ name: "Your Name" }],
   manifest: "/manifest.json",
-  themeColor: "#1e40af",
   icons: {
     icon: "/icons/icon-192x192.png",
     apple: "/icons/icon-192x192.png",
@@ -23,6 +22,12 @@ function PWAHead() {
       <link rel="mask-icon" href="/icons/safari-pinned-tab.webp" color="#1e40af" />
     </>
   );
+}
+
+export function generateViewport(){
+  return{
+    themeColor: "#1e40af",
+  }
 }
 
 export default function RootLayout({
