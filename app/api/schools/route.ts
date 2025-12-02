@@ -1,86 +1,115 @@
-// POST /api/schools
-import { NextResponse } from "next/server";
+// /app/api/schools/route.ts
+import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { v4 as uuidv4 } from "uuid";
+import { uploadSingleFileCloud, UploadedFile } from "@/middleware/uploadSingleCloud";
 
-// Helper to auto-generate school ID
-const generateSchoolId = async () => {
-  const { rows } = await pool.query(`SELECT COUNT(*) AS count FROM "School"`);
-  const nextId = Number(rows[0].count) + 1;
-  return `SCH-${nextId.toString().padStart(4, "0")}`;
-};
+// Disable Next.js body parser for FormData
+export const config = { api: { bodyParser: false } };
 
-///
-///Get
-//////
-
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const status = searchParams.get("status");
-
-  let query = `SELECT * FROM "School"`;
-  const values: any[] = [];
-
-  if (status) {
-    query += ` WHERE status = $1`;
-    values.push(status);
+// -----------------------------
+// GET ALL SCHOOLS
+// -----------------------------
+export async function GET() {
+  try {
+    const { rows } = await pool.query(`SELECT * FROM "School" ORDER BY created_at DESC`);
+    return NextResponse.json(rows);
+  } catch (err: any) {
+    console.error("GET Error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
-
-  const { rows } = await pool.query(query, values);
-  return NextResponse.json(rows);
-}
-////
-// create new school
-///
-// POST
-/////
-export async function POST(request: Request) {
-  const {
-    school_name,
-    school_email,
-    school_phone,
-    school_address,
-    school_type,
-    district,
-    province,
-    number_of_students,
-    number_of_teachers,
-    subscription_year,
-    registration_certificate,
-    school_license,
-    other_documents,
-    invoice
-  } = await request.json();
-
-  const schoolId = await generateSchoolId();
-
-  const { rows } = await pool.query(
-    `INSERT INTO "School" (
-      school_id, school_name, school_email, school_phone, school_address,
-      school_type, district, province, number_of_students, number_of_teachers,
-      subscription_year, registration_certificate, school_license, other_documents,
-      invoice
-    ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15
-    ) RETURNING *`,
-    [
-      schoolId,
-      school_name,
-      school_email,
-      school_phone,
-      school_address,
-      school_type,
-      district,
-      province,
-      number_of_students,
-      number_of_teachers,
-      subscription_year,
-      registration_certificate,
-      school_license,
-      other_documents,
-      invoice
-    ]
-  );
-
-  return NextResponse.json(rows[0]);
 }
 
+// -----------------------------
+// CREATE SCHOOL + UPLOAD FILES
+// -----------------------------
+export async function POST(req: NextRequest) {
+  try {
+    const formData = await req.formData();
+    const school_id = uuidv4();
+
+    // Extract all the text fields
+    const fields = {
+      school_name: formData.get("school_name") as string,
+      school_email: formData.get("school_email") as string,
+      school_phone: formData.get("school_phone") as string,
+      school_type: formData.get("school_type") as string,
+      district: formData.get("district") as string,
+      province: formData.get("province") as string,
+      number_of_students: formData.get("number_of_students") as string,
+      number_of_teachers: formData.get("number_of_teachers") as string,
+      subscription_year: formData.get("subscription_year") as string,
+      level: formData.get("level") as string,
+      cell: formData.get("cell") as string,
+      sector: formData.get("sector") as string,
+      village: formData.get("village") as string,
+      registration_date: formData.get("registration_date") as string,
+      headmaster_name: formData.get("headmaster_name") as string,
+      headmaster_email: formData.get("headmaster_email") as string,
+      headmaster_phone: formData.get("headmaster_phone") as string,
+    };
+
+    // Uploadable file fields
+    const fileUploads: any = {
+      registration_certificate: null,
+      payment_proof: null,
+      invoice: null,
+      other_documents: null,
+    };
+
+    // Upload each file to Cloudinary
+    for (const key of Object.keys(fileUploads)) {
+      const fileBlob = formData.get(key) as Blob | null;
+
+      if (fileBlob) {
+        const uploaded: UploadedFile = await uploadSingleFileCloud(fileBlob);
+        fileUploads[key] = uploaded.url;
+      }
+    }
+
+    // Insert school + file URLs directly into School table
+    const { rows } = await pool.query(
+      `INSERT INTO "School" (
+        school_id, school_name, school_email, school_phone, school_type,
+        district, province, number_of_students, number_of_teachers,
+        subscription_year, level, cell, sector, village, registration_date,
+        headmaster_name, headmaster_email, headmaster_phone,
+        registration_certificate, payment_proof, invoice, other_documents
+      )
+      VALUES (
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
+        $19,$20,$21,$22
+      )
+      RETURNING *`,
+      [
+        school_id,
+        fields.school_name,
+        fields.school_email,
+        fields.school_phone,
+        fields.school_type,
+        fields.district,
+        fields.province,
+        fields.number_of_students,
+        fields.number_of_teachers,
+        fields.subscription_year,
+        fields.level,
+        fields.cell,
+        fields.sector,
+        fields.village,
+        fields.registration_date,
+        fields.headmaster_name,
+        fields.headmaster_email,
+        fields.headmaster_phone,
+        fileUploads.registration_certificate,
+        fileUploads.payment_proof,
+        fileUploads.invoice,
+        fileUploads.other_documents,
+      ]
+    );
+
+    return NextResponse.json(rows[0]);
+  } catch (err: any) {
+    console.error("POST Error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

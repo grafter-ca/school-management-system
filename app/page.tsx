@@ -33,7 +33,6 @@ console.log("Api url", process.env.NEXT_PUBLIC_APP_URL)
         // Login successful → redirect to dashboard
         window.location.href = '/onboard';
       } else {
-        // Show error if login failed
         console.error('Login failed:', data.error);
         alert(data.error || 'Login failed');
       }
