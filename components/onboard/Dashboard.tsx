@@ -71,7 +71,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 
   const handleUpdateSchool = async (updatedSchool: Omit<School, 'id' | 'status' | 'registrationDate'>) => {
     if (editingSchool) {
-      await fetch(`/api/users/schools/${editingSchool.id}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools/${editingSchool.id}`, {
         method: "PUT",
         headers: {"content-type": "application/json"},
         body: JSON.stringify(updatedSchool)
@@ -84,7 +84,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
   };
 
   const handleRequestApproval = async (schoolId: string) => {
-   await fetch(`/api/users/schools/${schoolId}/status`, {
+   await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools/request-approval`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "Pending Approval" }),
