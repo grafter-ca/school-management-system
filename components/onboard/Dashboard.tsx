@@ -28,7 +28,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 
   const fetchSchools = async () => {
     try {
-      const res = await fetch('')
+      const res = await fetch(`/api/schools`);
       const data = await res.json();
       setSchools(data);
     } catch (error) {
@@ -40,57 +40,89 @@ export default function Dashboard({ onLogout }: DashboardProps) {
     fetchSchools();
   }, []);
 
-  const handleAddSchool = async (school: Omit<School, 'id' | 'status' | 'registrationDate'>) => {
-    const registrationYear = new Date().getFullYear();
-    const existingIds = schools.map(s => s.id);
-    const schoolId = generateSchoolId(school.level, registrationYear, existingIds);
-    
-    const newSchool: School = {
-      ...school,
-      id: schoolId,
-      status: 'Draft',
-      registrationDate: new Date().toISOString().split('T')[0],
-    };
-    await fetch('', {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body:JSON.stringify(newSchool)
-    })
+  const handleAddSchool = async (formData: FormData) => {
+    try {
+      const response = await fetch('/api/schools', {
+        method: "POST",
+        body: formData // Send FormData directly
+      });
 
-    fetchSchools();
-    setShowAddForm(false)
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to add school:", errorData);
+        alert(`Error: ${errorData.error || 'Failed to add school'}`);
+        return;
+      }
+
+      await fetchSchools();
+      setShowAddForm(false);
+      alert('School added successfully!');
+    } catch (error) {
+      console.error("Failed to add school:", error);
+      alert('An error occurred while adding the school');
+    }
   };
 
   const handleEditSchool = (school: School) => {
-    const canEdit = school.status === 'Draft' || school.status === 'Rejected';
+    const canEdit = school.status === 'DRAFT' || school.status === 'REJECTED';
     if (canEdit) {
       setEditingSchool(school);
       setShowAddForm(true);
     }
   };
 
-  const handleUpdateSchool = async (updatedSchool: Omit<School, 'id' | 'status' | 'registrationDate'>) => {
+  const handleUpdateSchool = async (formData: FormData) => {
     if (editingSchool) {
-      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools/${editingSchool.id}`, {
-        method: "PUT",
-        headers: {"content-type": "application/json"},
-        body: JSON.stringify(updatedSchool)
-      });
+      try {
+        // Use school_id for the API endpoint
+        const schoolId = editingSchool.school_id || editingSchool.id;
+        const response = await fetch(`/api/schools/${schoolId}`, {
+          method: "PUT",
+          body: formData // Send FormData directly
+        });
 
-      fetchSchools();
-      setEditingSchool(null);
-      setShowAddForm(false);
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Failed to update school:", errorData);
+          alert(`Error: ${errorData.error || 'Failed to update school'}`);
+          return;
+        }
+
+        const result = await response.json();
+        console.log("School updated:", result);
+        
+        await fetchSchools();
+        setEditingSchool(null);
+        setShowAddForm(false);
+        alert('School updated successfully!');
+      } catch (error) {
+        console.error("Failed to update school:", error);
+        alert('An error occurred while updating the school');
+      }
     }
   };
 
   const handleRequestApproval = async (schoolId: string) => {
-   await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools/request-approval`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Pending Approval" }),
-    });
+    try {
+      const response = await fetch(`/api/schools/request-approval`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ schoolId, status: "PENDING" }),
+      });
 
-    fetchSchools();
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to request approval:", errorData);
+        alert(`Error: ${errorData.error || 'Failed to request approval'}`);
+        return;
+      }
+
+      await fetchSchools();
+      alert('Approval requested successfully!');
+    } catch (error) {
+      console.error("Failed to request approval:", error);
+      alert('An error occurred while requesting approval');
+    }
   };
 
   const handleCancelForm = () => {
@@ -104,9 +136,14 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 
   // Filter and Search logic
   const filteredSchools = schools.filter(school => {
-    const matchesSearch = school.schoolName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLevel = !filterLevel || school.level === filterLevel;
-    const matchesStatus = !filterStatus || school.status === filterStatus;
+    const name = school?.school_name?.toLocaleLowerCase() ?? "";
+
+    const search = searchTerm?.toLocaleLowerCase() ?? "";
+
+    const matchesSearch = name.includes(search);
+
+    const matchesLevel = !filterLevel || school?.level === filterLevel;
+    const matchesStatus = !filterStatus || school?.status === filterStatus;
     
     return matchesSearch && matchesLevel && matchesStatus;
   });
@@ -198,10 +235,10 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                       >
                         <option value="">All Statuses</option>
-                        <option value="Draft">Draft</option>
-                        <option value="Pending Approval">Pending Approval</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
+                        <option value="DRAFT">DRAFT</option>
+                        <option value="PENDING">PENDING</option>
+                        <option value="APPROVED">APPROVED</option>
+                        <option value="REJECTED">REJECTED</option>
                       </select>
                     </div>
 

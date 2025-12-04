@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
         fileUploads.payment_proof,
         fileUploads.invoice,
         fileUploads.other_documents,
-        fileUploads.reject_message,
+        fields.reject_message,
       ]
     );
 

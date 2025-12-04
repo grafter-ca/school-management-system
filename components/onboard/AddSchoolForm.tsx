@@ -7,7 +7,7 @@ import { locationData } from '@/components/onboard/locationData';
 
 interface AddSchoolFormProps {
   school?: School | null;
-  onSubmit: (school: Omit<School, 'id' | 'status' | 'registrationDate'>) => void;
+  onSubmit: (formData: FormData) => void;
   onCancel: () => void;
 }
 
@@ -22,12 +22,15 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
     type: 'Public',
     level: 'Primary',
     numberOfStudents: 0,
+    numberOfTeachers: 0,
     subscription: 'Basic',
-    region: '',
+    subscriptionYear: currentYear.toString(),
+    province: '',
     district: '',
     sector: '',
     cell: '',
     village: '',
+    registrationDate: '',
     // Part 2: Headmaster Information
     headmasterName: '',
     headmasterEmail: '',
@@ -35,6 +38,9 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
     // Part 3: Documents
     registrationCertificate: null as File | null,
     paymentProof: null as File | null,
+    invoice: null as File | null,
+    otherDocuments: null as File | null,
+    rejectMessage: '',
   });
 
   const [availableDistricts, setAvailableDistricts] = useState<string[]>([]);
@@ -49,74 +55,125 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
   useEffect(() => {
     if (school) {
       setFormData({
-        schoolName: school.schoolName,
-        schoolEmail: school.schoolEmail,
-        schoolPhone: school.schoolPhone,
-        type: school.type,
-        level: school.level,
-        numberOfStudents: school.numberOfStudents || 0,
-        subscription: school.subscription,
-        region: school.region,
+        schoolName: school.school_name || '',
+        schoolEmail: school.school_email || '',
+        schoolPhone: school.school_phone || '',
+        type: school.school_type || 'Public',
+        level: school.level || 'Primary',
+        numberOfStudents: school.number_of_students || 0,
+        numberOfTeachers: school.number_of_teachers || 0,
+        subscription: school.subscription || 'Basic',
+        subscriptionYear: school.subscription_year || currentYear.toString(),
+        province: school.province || '',
         district: school.district || '',
-        sector: school.sector,
-        cell: school.cell,
-        village: school.village,
-        headmasterName: school.headmasterName,
-        headmasterEmail: school.headmasterEmail,
-        headmasterPhone: school.headmasterPhone,
-        registrationCertificate: school.registrationCertificate,
-        paymentProof: school.paymentProof,
+        sector: school.sector || '',
+        cell: school.cell || '',
+        village: school.village || '',
+        registrationDate: school.registration_date || '',
+        headmasterName: school.headmaster_name || '',
+        headmasterEmail: school.headmaster_email || '',
+        headmasterPhone: school.headmaster_phone || '',
+        registrationCertificate: null,
+        paymentProof: null,
+        invoice: null,
+        otherDocuments: null,
+        rejectMessage: school.reject_message || '',
       });
     }
-  }, [school]);
+  }, [school, currentYear]);
 
-  // Update districts when region changes
+  // Update districts when province changes
   useEffect(() => {
-    if (formData.region && locationData[formData.region]) {
-      const districts = Object.keys(locationData[formData.region]);
+    if (formData.province && locationData[formData.province]) {
+      const districts = Object.keys(locationData[formData.province]);
       setAvailableDistricts(districts);
       setFormData(prev => ({ ...prev, district: '', sector: '', cell: '', village: '' }));
       setAvailableSectors([]);
       setAvailableCells([]);
       setAvailableVillages([]);
     }
-  }, [formData.region]);
+  }, [formData.province]);
 
   // Update sectors when district changes
   useEffect(() => {
-    if (formData.region && formData.district && locationData[formData.region]?.[formData.district]) {
-      const sectors = Object.keys(locationData[formData.region][formData.district]);
+    if (formData.province && formData.district && locationData[formData.province]?.[formData.district]) {
+      const sectors = Object.keys(locationData[formData.province][formData.district]);
       setAvailableSectors(sectors);
       setFormData(prev => ({ ...prev, sector: '', cell: '', village: '' }));
       setAvailableCells([]);
       setAvailableVillages([]);
     }
-  }, [formData.district]);
+  }, [formData.district, formData.province]);
 
   // Update cells when sector changes
   useEffect(() => {
-    if (formData.region && formData.district && formData.sector && 
-        locationData[formData.region]?.[formData.district]?.[formData.sector]) {
-      const cells = Object.keys(locationData[formData.region][formData.district][formData.sector]);
+    if (formData.province && formData.district && formData.sector && 
+        locationData[formData.province]?.[formData.district]?.[formData.sector]) {
+      const cells = Object.keys(locationData[formData.province][formData.district][formData.sector]);
       setAvailableCells(cells);
       setFormData(prev => ({ ...prev, cell: '', village: '' }));
       setAvailableVillages([]);
     }
-  }, [formData.sector]);
+  }, [formData.sector, formData.province, formData.district]);
 
   // Update villages when cell changes
   useEffect(() => {
-    if (formData.region && formData.district && formData.sector && formData.cell &&
-        locationData[formData.region]?.[formData.district]?.[formData.sector]?.[formData.cell]) {
-      const villages = locationData[formData.region][formData.district][formData.sector][formData.cell];
+    if (formData.province && formData.district && formData.sector && formData.cell &&
+        locationData[formData.province]?.[formData.district]?.[formData.sector]?.[formData.cell]) {
+      const villages = locationData[formData.province][formData.district][formData.sector][formData.cell];
       setAvailableVillages(villages);
       setFormData(prev => ({ ...prev, village: '' }));
     }
-  }, [formData.cell]);
+  }, [formData.cell, formData.province, formData.district, formData.sector]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    const fd = new FormData();
+
+    // Append text fields
+    fd.append("school_name", formData.schoolName);
+    fd.append("school_email", formData.schoolEmail);
+    fd.append("school_phone", formData.schoolPhone);
+    fd.append("school_type", formData.type);
+    fd.append("level", formData.level);
+    fd.append("number_of_students", String(formData.numberOfStudents));
+    fd.append("number_of_teachers", String(formData.numberOfTeachers));
+    fd.append("subscription", formData.subscription);
+    fd.append("subscription_year", formData.subscriptionYear);
+    fd.append("province", formData.province);
+    fd.append("district", formData.district);
+    fd.append("sector", formData.sector);
+    fd.append("cell", formData.cell);
+    fd.append("village", formData.village);
+    fd.append("registration_date", formData.registrationDate);
+    
+    fd.append("headmaster_name", formData.headmasterName);
+    fd.append("headmaster_email", formData.headmasterEmail);
+    fd.append("headmaster_phone", formData.headmasterPhone);
+    
+    if (formData.rejectMessage) {
+      fd.append("reject_message", formData.rejectMessage);
+    }
+
+    // Append files
+    if (formData.registrationCertificate) {
+      fd.append("registration_certificate", formData.registrationCertificate);
+    }
+
+    if (formData.paymentProof) {
+      fd.append("payment_proof", formData.paymentProof);
+    }
+
+    if (formData.invoice) {
+      fd.append("invoice", formData.invoice);
+    }
+
+    if (formData.otherDocuments) {
+      fd.append("other_documents", formData.otherDocuments);
+    }
+
+    onSubmit(fd);
   };
 
   const handleFileChange = (field: string, file: File | null) => {
@@ -163,6 +220,7 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
                 <label className="block text-gray-700 mb-2">School Name *</label>
                 <input
                   type="text"
+                  name='school_name'
                   value={formData.schoolName}
                   onChange={(e) => handleInputChange('schoolName', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
@@ -175,6 +233,7 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
                 <label className="block text-gray-700 mb-2">Email *</label>
                 <input
                   type="email"
+                  name='school_email'
                   value={formData.schoolEmail}
                   onChange={(e) => handleInputChange('schoolEmail', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
@@ -187,12 +246,27 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
                 <label className="block text-gray-700 mb-2">Phone Number *</label>
                 <input
                   type="tel"
+                  name='school_phone'
                   value={formData.schoolPhone}
                   onChange={(e) => handleInputChange('schoolPhone', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   placeholder="+250 XXX XXX XXX"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-2">School Type *</label>
+                <select aria-label='select type'
+                  value={formData.type}
+                  onChange={(e) => handleInputChange('type', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  required
+                >
+                  <option value="Public">Public</option>
+                  <option value="Private">Private</option>
+                  <option value="Government-Aided">Government-Aided</option>
+                </select>
               </div>
 
               <div>
@@ -224,8 +298,21 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
               </div>
 
               <div>
+                <label className="block text-gray-700 mb-2">Number of Teachers *</label>
+                <input
+                  type="number"
+                  value={formData.numberOfTeachers}
+                  onChange={(e) => handleInputChange('numberOfTeachers', parseInt(e.target.value) || 0)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  placeholder="0"
+                  min="0"
+                  required
+                />
+              </div>
+
+              <div>
                 <label className="block text-gray-700 mb-2">Subscription *</label>
-                <select aria-label='select type'
+                <select aria-label='select subscription'
                   value={formData.subscription}
                   onChange={(e) => handleInputChange('subscription', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
@@ -238,14 +325,37 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
               </div>
 
               <div>
-                <label className="block text-gray-700 mb-2">Region *</label>
-                <select aria-label='select region'
-                  value={formData.region}
-                  onChange={(e) => handleInputChange('region', e.target.value)}
+                <label className="block text-gray-700 mb-2">Subscription Year *</label>
+                <input
+                  type="text"
+                  value={formData.subscriptionYear}
+                  onChange={(e) => handleInputChange('subscriptionYear', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  placeholder="2025"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-2">Registration Date *</label>
+                <input
+                  type="date"
+                  value={formData.registrationDate}
+                  onChange={(e) => handleInputChange('registrationDate', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-2">Province *</label>
+                <select aria-label='select province'
+                  value={formData.province}
+                  onChange={(e) => handleInputChange('province', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   required
                 >
-                  <option value="">Select Region</option>
+                  <option value="">Select Province</option>
                   <option value="Kigali City">Kigali City</option>
                   <option value="Eastern Province">Eastern Province</option>
                   <option value="Western Province">Western Province</option>
@@ -260,7 +370,7 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
                   value={formData.district}
                   onChange={(e) => handleInputChange('district', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  disabled={!formData.region}
+                  disabled={!formData.province}
                   required
                 >
                   <option value="">Select District</option>
@@ -285,6 +395,7 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
                     placeholder={formData.sector || "Search sector..."}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                     disabled={!formData.district}
+                    required
                   />
                   {sectorSearch && !formData.sector && formData.district && (
                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -325,6 +436,7 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
                     placeholder={formData.cell || "Search cell..."}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                     disabled={!formData.sector}
+                    required
                   />
                   {cellSearch && !formData.cell && formData.sector && (
                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -365,6 +477,7 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
                     placeholder={formData.village || "Search village..."}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                     disabled={!formData.cell}
+                    required
                   />
                   {villageSearch && !formData.village && formData.cell && (
                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -399,6 +512,7 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
               <div>
                 <label className="block text-gray-700 mb-2">Full Name *</label>
                 <input
+                  name='headmaster_name'
                   type="text"
                   value={formData.headmasterName}
                   onChange={(e) => handleInputChange('headmasterName', e.target.value)}
@@ -412,6 +526,7 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
                 <label className="block text-gray-700 mb-2">Email *</label>
                 <input
                   type="email"
+                  name='headmaster_email'
                   value={formData.headmasterEmail}
                   onChange={(e) => handleInputChange('headmasterEmail', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
@@ -424,6 +539,7 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
                 <label className="block text-gray-700 mb-2">Phone Number *</label>
                 <input
                   type="tel"
+                  name='headmaster_phone'
                   value={formData.headmasterPhone}
                   onChange={(e) => handleInputChange('headmasterPhone', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
@@ -449,6 +565,16 @@ export default function AddSchoolForm({ school, onSubmit, onCancel }: AddSchoolF
                 file={formData.paymentProof}
                 onChange={(file) => handleFileChange('paymentProof', file)}
                 required
+              />
+              <FileUpload
+                label="Invoice"
+                file={formData.invoice}
+                onChange={(file) => handleFileChange('invoice', file)}
+              />
+              <FileUpload
+                label="Other Documents"
+                file={formData.otherDocuments}
+                onChange={(file) => handleFileChange('otherDocuments', file)}
               />
             </div>
           </div>
@@ -506,7 +632,7 @@ function FileUpload({ label, file, onChange, required }: FileUploadProps) {
               <p className="text-gray-500">{(file.size / 1024).toFixed(2)} KB</p>
             </div>
           </div>
-          <button aria-label='cancer'
+          <button aria-label='remove'
             type="button"
             onClick={handleRemove}
             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -521,9 +647,10 @@ function FileUpload({ label, file, onChange, required }: FileUploadProps) {
           <p className="text-gray-400">or drag and drop</p>
           <input
             type="file"
-            accept=".pdf"
+            name='file'
             onChange={handleFileChange}
             className="hidden"
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
             required={required && !file}
           />
         </label>

@@ -15,7 +15,7 @@ export async function PATCH(req: Request) {
 
     // Update DB status
     const { rows } = await pool.query(
-      `UPDATE schools SET status = 'PENDING' WHERE school_id = $1 RETURNING *`,
+      `UPDATE "School" SET status = 'PENDING' WHERE school_id = $1 RETURNING *`,
       [schoolId]
     );
     const school = rows[0];
@@ -24,7 +24,7 @@ export async function PATCH(req: Request) {
     // Send email via Resend
     const complianceEmail = process.env.COMPLIENCE_EMAIL || "caleb.designer1@gmail.com";
     try {
-      await sendApprovalRequest(complianceEmail, school.name, school.school_id);
+      await sendApprovalRequest(complianceEmail, school.school_name, school.school_id);
     } catch (err) {
       console.error("Failed to send approval email:", err);
       // optionally continue even if email fails
