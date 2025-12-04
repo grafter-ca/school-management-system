@@ -18,7 +18,7 @@ export default function ComplianceDashboard({ onLogout }: ComplianceDashboardPro
 
   const fetchPendingSchools = async () => {
     try {
-      const res = await fetch("/api/schools?status=PENDING");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools?status=PENDING`);
       const data = await res.json();
       setSchools(data);
     } catch (error) {
@@ -31,7 +31,7 @@ export default function ComplianceDashboard({ onLogout }: ComplianceDashboardPro
   }, []);
 
   const handleApprove = async(schoolId: string) => {
-    await fetch(`/api/schools/${schoolId}/status`, {
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools/${schoolId}/status`, {
       method: "PATCH",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({status: "APPROVED"}),
@@ -40,7 +40,7 @@ export default function ComplianceDashboard({ onLogout }: ComplianceDashboardPro
   };
 
   const handleReject = async (schoolId: string, reason: string) => {
-    await fetch(`api/schools/${schoolId}/status`, {
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools/${schoolId}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "REJECTED", rejectionReason: reason }),

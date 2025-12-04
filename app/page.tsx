@@ -1,13 +1,13 @@
 'use client';
 
 import LoginForm from '@/components/login';
+import { toast } from "sonner";
 
 export default function LoginPage() {
-
-console.log("Api url", process.env.NEXT_PUBLIC_APP_URL)
+  console.log("API URL", process.env.NEXT_PUBLIC_APP_URL);
 
   const handleForgotPassword = async () => {
-    console.log('Forgot password clicked');
+    toast("Forgot password clicked. Feature coming soon!");
   };
 
   const handleLoginSubmit = async (email: string, password: string) => {
@@ -21,25 +21,26 @@ console.log("Api url", process.env.NEXT_PUBLIC_APP_URL)
         body: JSON.stringify({ email, password }),
       });
 
-
-      console.log('Response status:', res.status);
-      console.log('Response ok:', res.ok);
-
       const data = await res.json();
       console.log('Response data:', data);
-      
-      // Check if response is successful AND no error in data
+
       if (res.ok && !data.error) {
-        console.log('Login successful, redirecting...');
-        // Login successful → redirect to dashboard
-        window.location.href = '/onboard';
+        toast(`Login successful! Welcome back, ${data.user.name}.`);
+
+        // Redirect based on sms_role
+        if (data.user.sms_role === "ONBOARDING") {
+          window.location.href = "/onboard";
+        } else if (data.user.sms_role === "COMPLIANCE") {
+          window.location.href = "/compliance";
+        } else {
+          window.location.href = "/dashboard";
+        }
       } else {
-        console.error('Login failed:', data.error);
-        alert(data.error || 'Login failed');
+        toast(`Login failed: ${data.error || "Invalid email or password"}`);
       }
     } catch (error) {
       console.error('Network error:', error);
-      alert('Network error. Please try again.');
+      toast("Network error. Please try again later.");
     }
   };
 

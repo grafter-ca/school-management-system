@@ -6,7 +6,6 @@ import { SchoolsTable } from './SchoolsTable';
 import  AddSchoolForm  from './AddSchoolForm';
 import { ViewSchoolModal } from '@/components/onboard/ViewSchoolModal';
 import { School } from '@/types';
-import { generateSchoolId } from '@/utils/schoolId';
 import { Search, Filter } from 'lucide-react';
 
 interface DashboardProps {
@@ -28,7 +27,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 
   const fetchSchools = async () => {
     try {
-      const res = await fetch(`/api/schools`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools`);
       const data = await res.json();
       setSchools(data);
     } catch (error) {
@@ -42,7 +41,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 
   const handleAddSchool = async (formData: FormData) => {
     try {
-      const response = await fetch('/api/schools', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools`, {
         method: "POST",
         body: formData // Send FormData directly
       });
@@ -76,7 +75,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
       try {
         // Use school_id for the API endpoint
         const schoolId = editingSchool.school_id || editingSchool.id;
-        const response = await fetch(`/api/schools/${schoolId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools/${schoolId}`, {
           method: "PUT",
           body: formData // Send FormData directly
         });
@@ -104,7 +103,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 
   const handleRequestApproval = async (schoolId: string) => {
     try {
-      const response = await fetch(`/api/schools/request-approval`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools/request-approval`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ schoolId, status: "PENDING" }),

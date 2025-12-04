@@ -11,7 +11,6 @@ import { Mail, ArrowLeft, CheckCircle, Lock, BookOpen } from 'lucide-react';
 export default function Login({onForgotPassword, onLogin}: LoginFormProps) {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [mounted, setMounted] = useState(false)
- 
 
   useEffect(()=>{
     setMounted(true);
