@@ -1,4 +1,5 @@
 'use client'
+
 import { useState, useEffect } from 'react';
 import { Mail, ArrowLeft, CheckCircle, Lock, BookOpen } from 'lucide-react';
 
@@ -10,7 +11,6 @@ import { Mail, ArrowLeft, CheckCircle, Lock, BookOpen } from 'lucide-react';
 export default function Login({onForgotPassword, onLogin}: LoginFormProps) {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [mounted, setMounted] = useState(false)
-
  
 
   useEffect(()=>{
@@ -38,6 +38,8 @@ function LoginForm({ onForgotPassword, onLogin }: { onForgotPassword: () => void
   onLogin:(email: string, password: string)=> void, }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false)
+
 
   const handleSubmit = () => {
     onLogin(email, password)
@@ -110,11 +112,44 @@ function LoginForm({ onForgotPassword, onLogin }: { onForgotPassword: () => void
         </div>
 
         <button
-          onClick={handleSubmit}
-          className="w-full bg-linear-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-lg font-medium hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl"
-        >
-          Sign In
-        </button>
+  onClick={handleSubmit}
+  disabled={loading}
+  className={`w-full flex items-center justify-center gap-2 
+    bg-linear-to-r from-blue-500 to-indigo-600 
+    text-white py-3 rounded-lg font-medium 
+    transition-all shadow-lg hover:shadow-xl
+    ${loading ? "opacity-70 cursor-not-allowed" : "hover:from-blue-600 hover:to-indigo-700"}
+  `}
+>
+  {loading ? (
+    <>
+      <svg
+        className="animate-spin h-5 w-5 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v4l3-3-3-3v4a12 12 0 00-12 12h4z"
+        ></path>
+      </svg>
+      <span>Signing In...</span>
+    </>
+  ) : (
+    "Sign In"
+  )}
+</button>
+
       </div>
     </div>
   );

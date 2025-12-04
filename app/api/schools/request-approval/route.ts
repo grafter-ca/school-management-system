@@ -22,7 +22,7 @@ export async function PATCH(req: Request) {
     if (!school) return NextResponse.json({ error: "School not found" }, { status: 404 });
 
     // Send email via Resend
-    const complianceEmail = process.env.COMPLIENCE_EMAIL || "caleb.designer1@gmail.com";
+    const complianceEmail = process.env.COMPLIENCE_EMAIL || "callebhabyar55@gmail.com";
     try {
       await sendApprovalRequest(complianceEmail, school.school_name, school.school_id);
     } catch (err) {

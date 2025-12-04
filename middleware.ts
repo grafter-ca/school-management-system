@@ -5,7 +5,10 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
 
   // Protect ALL routes starting with /onboard
-  const isProtectedRoute = request.nextUrl.pathname.startsWith("/onboard");
+  const isProtectedRoute =
+    request.nextUrl.pathname.startsWith("/onboard") ||
+    request.nextUrl.pathname.startsWith("/compliance");
+
 
   if (isProtectedRoute) {
     if (!token) {
@@ -19,5 +22,5 @@ export function middleware(request: NextRequest) {
 
 // Define which paths the middleware applies to
 export const config = {
-  matcher: ["/onboard/:path*"],  // protect ALL /onboard/* pages
+  matcher: ["/onboard/:path*", "/compliance/:path*"],  // protect ALL /onboard/* pages
 };
