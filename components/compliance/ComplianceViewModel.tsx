@@ -27,7 +27,7 @@ export function ComplianceViewModal({ school, onClose, onApprove, onReject }: Co
     }
   };
 
-  const isPending = school.status === 'Pending Approval';
+  const isPending = school.status === 'PENDING';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -48,18 +48,18 @@ export function ComplianceViewModal({ school, onClose, onApprove, onReject }: Co
             <div>
               <h3 className="text-gray-900 mb-4 pb-2 border-b-2 border-blue-500">Part 1: School Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InfoField label="School Name" value={school.schoolName} />
-                <InfoField label="Email" value={school.schoolEmail} />
-                <InfoField label="Phone Number" value={school.schoolPhone} />
+                <InfoField label="School Name" value={school.school_name} />
+                <InfoField label="Email" value={school.school_email} />
+                <InfoField label="Phone Number" value={school.school_phone} />
                 <InfoField label="Level" value={school.level} />
-                <InfoField label="Number of Students" value={school.numberOfStudents?.toString() ?? '0'} />
+                <InfoField label="Number of Students" value={school.number_of_students?.toString() ?? '0'} />
                 <InfoField label="Subscription" value={school.subscription} />
-                <InfoField label="Region" value={school.region} />
+                <InfoField label="Region" value={school.province} />
                 <InfoField label="District" value={school.district ?? 'N/A'} />
                 <InfoField label="Sector" value={school.sector} />
                 <InfoField label="Cell" value={school.cell} />
                 <InfoField label="Village" value={school.village} />
-                <InfoField label="Registration Date" value={school.registrationDate} />
+                <InfoField label="Registration Date" value={school.registration_date} />
               </div>
             </div>
 
@@ -67,9 +67,9 @@ export function ComplianceViewModal({ school, onClose, onApprove, onReject }: Co
             <div>
               <h3 className="text-gray-900 mb-4 pb-2 border-b-2 border-green-500">Part 2: Headmaster Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InfoField label="Full Name" value={school.headmasterName} />
-                <InfoField label="Email" value={school.headmasterEmail} />
-                <InfoField label="Phone Number" value={school.headmasterPhone} />
+                <InfoField label="Full Name" value={school.headmaster_name} />
+                <InfoField label="Email" value={school.headmaster_email} />
+                <InfoField label="Phone Number" value={school.headmaster_phone} />
               </div>
             </div>
 
@@ -77,8 +77,8 @@ export function ComplianceViewModal({ school, onClose, onApprove, onReject }: Co
             <div>
               <h3 className="text-gray-900 mb-4 pb-2 border-b-2 border-purple-500">Part 3: Documents</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <DocumentField label="School Registration Certificate" file={school.registrationCertificate} />
-                <DocumentField label="Payment Proof" file={school.paymentProof} />
+                <DocumentField label="School Registration Certificate" file={school.registration_certificate} />
+                <DocumentField label="Payment Proof" file={school.payment_proof} />
               </div>
             </div>
 
@@ -87,18 +87,18 @@ export function ComplianceViewModal({ school, onClose, onApprove, onReject }: Co
               <h3 className="text-gray-900 mb-4 pb-2 border-b-2 border-orange-500">Status Information</h3>
               <div className="grid grid-cols-1 gap-6">
                 <InfoField label="Status" value={school.status} />
-                {school.rejectionReason && (
+                {school.rejection_reason && (
                   <div>
                     <label className="block text-gray-700 mb-2">Previous Rejection Reason</label>
                     <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-red-800">{school.rejectionReason}</p>
+                      <p className="text-red-800">{school.rejection_reason}</p>
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Approval/Rejection Section - Only for Pending Approvals */}
+            {/* Approval/Rejection Section - Only for PENDINGs */}
             {isPending && !showRejectForm && (
               <div className="border-t-2 border-gray-200 pt-6">
                 <div className="flex justify-end space-x-4">
@@ -156,9 +156,9 @@ export function ComplianceViewModal({ school, onClose, onApprove, onReject }: Co
             )}
 
             {/* Already Processed Message */}
-            {(school.status === 'Approved' || school.status === 'Rejected') && (
-              <div className={`${school.status === 'Approved' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border rounded-lg p-4`}>
-                <p className={school.status === 'Approved' ? 'text-green-800' : 'text-red-800'}>
+            {(school.status === 'APPROVED' || school.status === 'REJECTED') && (
+              <div className={`${school.status === 'APPROVED' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border rounded-lg p-4`}>
+                <p className={school.status === 'APPROVED' ? 'text-green-800' : 'text-red-800'}>
                   This school has been {school.status.toLowerCase()}.
                 </p>
               </div>
@@ -188,7 +188,7 @@ function InfoField({ label, value }: InfoFieldProps) {
 
 interface DocumentFieldProps {
   label: string;
-  file: File | null;
+  file: string | File | null | undefined;
 }
 
 function DocumentField({ label, file }: DocumentFieldProps) {
@@ -201,8 +201,9 @@ function DocumentField({ label, file }: DocumentFieldProps) {
             <FileText className="w-5 h-5 text-blue-600" />
           </div>
           <div>
-            <p className="text-gray-900">{file.name}</p>
-            <p className="text-gray-500">{(file.size / 1024).toFixed(2)} KB</p>
+            {/* // to be changed */}
+            <p className="text-gray-900">{label}</p>
+            <p className="text-gray-500">{(label)}</p>
           </div>
         </div>
       ) : (
