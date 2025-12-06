@@ -42,7 +42,6 @@ export async function POST(req: NextRequest) {
       name: user.name,
       email: user.email,
       sms_role: user.sms_role,
-      token:token,
     },
     token
   });

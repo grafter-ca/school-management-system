@@ -1,6 +1,7 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import "@/app/globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
   title: "School Onboarding Portal",
@@ -43,7 +44,9 @@ export default function RootLayout({
       </head>
 
       <body className="antialiased" suppressHydrationWarning>
+        <AuthProvider>
         {children}
+        </AuthProvider>
       </body>
     </html>
   );

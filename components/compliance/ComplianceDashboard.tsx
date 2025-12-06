@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import  Navbar  from '@/components/onboard/Navbar';
+import  Navbar  from '@/components/compliance/Navbar';
 import { SchoolsTable } from '@/components/onboard/SchoolsTable';
 import { ComplianceViewModal } from '@/components/compliance/ComplianceViewModel';
 import { School } from '@/types';
