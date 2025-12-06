@@ -46,8 +46,6 @@ export default function LoginPage() {
 
   return (
     <LoginForm
-      onForgotPassword={handleForgotPassword}
-      onLogin={handleLoginSubmit}
     />
   );
 }

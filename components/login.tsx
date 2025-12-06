@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-export default function Login() {
+ function Login() {
   const route = useRouter();
   const { login, user } = useAuth();
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -300,3 +300,6 @@ function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
     </div>
   );
 }
+
+
+export default Login
