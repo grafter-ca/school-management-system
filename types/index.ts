@@ -1,30 +1,38 @@
-export type SchoolStatus = 'Draft' | 'Pending Approval' | 'Approved' | 'Rejected';
+export type SchoolStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface School {
   id: string;
-  schoolName: string;
-  schoolEmail: string;
-  schoolPhone: string;
+  school_id?: string;
+  school_name: string;
+  school_email: string;
+  school_phone: string;
   level: string;
-  type:string;
-  numberOfStudents?: number;
+  school_type: string;
+  number_of_students?: number;
+  number_of_teachers?: number;
   subscription: string;
-  region: string;
+  subscription_year?: string;
+  province: string;
   district?: string;
   sector: string;
   cell: string;
   village: string;
   // Part 2: Headmaster Information
-  headmasterName: string;
-  headmasterEmail: string;
-  headmasterPhone: string;
+  headmaster_name: string;
+  headmaster_email: string;
+  headmaster_phone: string;
   // Part 3: Documents
-  registrationCertificate: File | null;
-  paymentProof: File | null;
+  registration_certificate?: File | string | null;
+  payment_proof?: File | string | null;
+  invoice?: File | string | null;
+  other_documents?: File | string | null;
   // Metadata
-  registrationDate: string;
+  registration_date: string;
   status: SchoolStatus;
-  rejectionReason?: string;
+  rejection_reason?: string;
+  reject_message?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface LocationData {

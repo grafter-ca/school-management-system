@@ -1,13 +1,19 @@
+"use client"
 
-'use client';
-
-import Dashboard from '@/components/onboard/Dashboard';
+import Dashboard from "@/components/onboard/Dashboard";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function OnboardPage() {
+  const route = useRouter();
   const handleLogout = () => {
-    console.log('User logged out');
-    // You can integrate your actual logout logic here
-    // e.g., clearing cookies, redirecting, calling an API, etc.
+    document.cookie = `token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+
+    // Show toast
+    toast("You have been successfully logged out.");
+
+    // Redirect to login page
+    route.push('/login')
   };
 
   return <Dashboard onLogout={handleLogout} />;

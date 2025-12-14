@@ -4,35 +4,88 @@ import { Upload, X, FileText, ArrowLeft, GraduationCap, Plus } from 'lucide-reac
 import { School } from '@/types/index';
 import AddSchoolForm from './AddSchoolForm';
 
-
 export default function AddSchool() {
   const [schools, setSchools] = useState<School[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingSchool, setEditingSchool] = useState<School | null>(null);
 
-  // Accept the type expected by AddSchoolForm: omit status, id, registrationDate
-  const handleAddSchool = (schoolData: Omit<School, 'id' | 'status' | 'registrationDate'>) => {
-    const newSchool: School = {
-      ...schoolData,
-      id: Date.now().toString(),
-      registrationDate: new Date().toISOString(),
-      status: 'Pending Approval' // use the allowed union member
-    };
-    setSchools([...schools, newSchool]);
-    setShowForm(false);
-    setEditingSchool(null);
-  };
+  // Handle FormData submission
+  const handleAddSchool = async (formData: FormData) => {
+    try {
+      // Convert FormData to School object
+      const schoolData: School = {
+        id: Date.now().toString(),
+        school_id: formData.get('school_id') as string,
+        school_name: formData.get('school_name') as string,
+        school_email: formData.get('school_email') as string,
+        school_phone: formData.get('school_phone') as string,
+        school_type: formData.get('school_type') as string,
+        level: formData.get('level') as string,
+        number_of_students: parseInt(formData.get('number_of_students') as string) || 0,
+        number_of_teachers: parseInt(formData.get('number_of_teachers') as string) || 0,
+        subscription: formData.get('subscription') as string,
+        subscription_year: formData.get('subscription_year') as string,
+        province: formData.get('province') as string,
+        district: formData.get('district') as string,
+        sector: formData.get('sector') as string,
+        cell: formData.get('cell') as string,
+        village: formData.get('village') as string,
+        headmaster_name: formData.get('headmaster_name') as string,
+        headmaster_email: formData.get('headmaster_email') as string,
+        headmaster_phone: formData.get('headmaster_phone') as string,
+        registration_certificate: formData.get('registration_certificate') as File | null,
+        payment_proof: formData.get('payment_proof') as File | null,
+        invoice: formData.get('invoice') as File | null,
+        other_documents: formData.get('other_documents') as File | null,
+        registration_date: new Date().toISOString(),
+        status: 'DRAFT' as const
+      };
 
-  // same for edit: incoming data won't contain registrationDate, preserve it from editingSchool
-  const handleEditSchool = (schoolData: Omit<School, 'id' | 'status' | 'registrationDate'>) => {
-    if (editingSchool) {
-      setSchools(schools.map(s =>
-        s.id === editingSchool.id
-          ? { ...s, ...schoolData } // preserve id, status, registrationDate from s
-          : s
-      ));
+      setSchools([...schools, schoolData]);
       setShowForm(false);
       setEditingSchool(null);
+    } catch (error) {
+      console.error('Error adding school:', error);
+    }
+  };
+
+  const handleEditSchool = async (formData: FormData) => {
+    if (!editingSchool) return;
+
+    try {
+      // Convert FormData to updated School object
+      const updatedSchool: School = {
+        ...editingSchool,
+        school_id: formData.get('school_id') as string,
+        school_name: formData.get('school_name') as string,
+        school_email: formData.get('school_email') as string,
+        school_phone: formData.get('school_phone') as string,
+        school_type: formData.get('school_type') as string,
+        level: formData.get('level') as string,
+        number_of_students: parseInt(formData.get('number_of_students') as string) || 0,
+        number_of_teachers: parseInt(formData.get('number_of_teachers') as string) || 0,
+        subscription: formData.get('subscription') as string,
+        subscription_year: formData.get('subscription_year') as string,
+        province: formData.get('province') as string,
+        district: formData.get('district') as string,
+        sector: formData.get('sector') as string,
+        cell: formData.get('cell') as string,
+        village: formData.get('village') as string,
+        headmaster_name: formData.get('headmaster_name') as string,
+        headmaster_email: formData.get('headmaster_email') as string,
+        headmaster_phone: formData.get('headmaster_phone') as string,
+        // Only update files if new ones are provided
+        registration_certificate: formData.get('registration_certificate') as File || editingSchool.registration_certificate,
+        payment_proof: formData.get('payment_proof') as File || editingSchool.payment_proof,
+        invoice: formData.get('invoice') as File || editingSchool.invoice,
+        other_documents: formData.get('other_documents') as File || editingSchool.other_documents,
+      };
+
+      setSchools(schools.map(s => s.id === editingSchool.id ? updatedSchool : s));
+      setShowForm(false);
+      setEditingSchool(null);
+    } catch (error) {
+      console.error('Error editing school:', error);
     }
   };
 
@@ -74,8 +127,8 @@ export default function AddSchool() {
                         <GraduationCap className="w-6 h-6 text-blue-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{school.schoolName}</h3>
-                        <span className="text-sm text-gray-500">{school.type}</span>
+                        <h3 className="font-semibold text-gray-900">{school.school_name}</h3>
+                        <span className="text-sm text-gray-500">{school.school_type}</span>
                       </div>
                     </div>
                     <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
@@ -83,9 +136,9 @@ export default function AddSchool() {
                     </span>
                   </div>
                   <div className="space-y-2 text-sm text-gray-600 mb-4">
-                    <p>📧 {school.schoolEmail}</p>
-                    <p>📍 {school.district}, {school.region}</p>
-                    <p>👥 {school.numberOfStudents} students</p>
+                    <p>📧 {school.school_email}</p>
+                    <p>📍 {school.district}, {school.province}</p>
+                    <p>👥 {school.number_of_students} students</p>
                   </div>
                   <button
                     onClick={() => handleEdit(school)}
@@ -123,4 +176,3 @@ export default function AddSchool() {
     </div>
   );
 }
-

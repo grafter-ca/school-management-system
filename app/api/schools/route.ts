@@ -10,13 +10,26 @@ import {
 export const config = { api: { bodyParser: false } };
 
 // -----------------------------
-// GET ALL SCHOOLS
+// GET ALL SCHOOLS (with optional status filter)
 // -----------------------------
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const { rows } = await pool.query(
-      `SELECT * FROM "School" ORDER BY created_at DESC`
-    );
+    const { searchParams } = new URL(req.url);
+    const status = searchParams.get("status");
+
+    let query = `SELECT * FROM "School"`;
+    const params: any[] = [];
+
+    // Filter by status if provided
+    if (status) {
+      query += ` WHERE status = $1`;
+      params.push(status);
+    }
+
+    query += ` ORDER BY created_at DESC`;
+
+    const { rows } = await pool.query(query, params);
+    
     return NextResponse.json(rows);
   } catch (err: any) {
     console.error("GET Error:", err);
@@ -30,9 +43,23 @@ export async function POST(req: NextRequest) {
 
   try {
     const formData = await req.formData();
-    const school_id = uuidv4();
 
-    //Extract all the text fields
+ function generateSchoolID(Level: string) {
+  // Take the first letter of the school level and make it uppercase
+  const levelLetter = Level.charAt(0).toUpperCase();
+
+  // Generate 4 random digits
+  const randomDigits = Math.floor(1000 + Math.random() * 9000); // 1000-9999
+
+  // Combine to create school ID
+  const schoolID = `SCH-${levelLetter}${randomDigits}`;
+
+  return schoolID;
+}
+
+
+
+    // Extract all the text fields
     const fields = {
       school_name: formData.get("school_name") as string,
       school_email: formData.get("school_email") as string,
@@ -54,7 +81,10 @@ export async function POST(req: NextRequest) {
       reject_message: formData.get("reject_message") as string,
     };
 
-    // check if school already exit
+    // schoool id
+      const school_id = generateSchoolID(fields.level);
+
+    // check if school already exists
     const existingSchool = await pool.query(
       `SELECT * FROM "School" WHERE school_email = $1`,
       [fields.school_email]
@@ -92,7 +122,7 @@ export async function POST(req: NextRequest) {
         district, province, number_of_students, number_of_teachers,
         subscription_year, level, cell, sector, village, registration_date,
         headmaster_name, headmaster_email, headmaster_phone,
-        registration_certificate, payment_proof, invoice, other_documents,reject_message
+        registration_certificate, payment_proof, invoice, other_documents, reject_message
       )
       VALUES (
         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
@@ -123,6 +153,7 @@ export async function POST(req: NextRequest) {
         fileUploads.payment_proof,
         fileUploads.invoice,
         fileUploads.other_documents,
+        fields.reject_message,
       ]
     );
 

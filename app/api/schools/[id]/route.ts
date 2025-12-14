@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
-import { uploadSingleFileCloud } from "@/middleware/uploadSingleCloud";
+import { uploadSingleFileCloud, UploadedFile } from "@/middleware/uploadSingleCloud";
 import { v4 as uuidv4 } from "uuid";
 
 export const config = { api: { bodyParser: false } };
@@ -12,23 +12,28 @@ export async function GET(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params;
+  try {
+    const { id } = await context.params;
 
-  const { rows } = await pool.query(
-    `SELECT * FROM "School" WHERE school_id = $1`,
-    [id]
-  );
+    const { rows } = await pool.query(
+      `SELECT * FROM "School" WHERE school_id = $1`,
+      [id]
+    );
 
-  if (rows.length === 0) {
-    return NextResponse.json({ error: "School not found" }, { status: 404 });
+    if (rows.length === 0) {
+      return NextResponse.json({ error: "School not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(rows[0]);
+  } catch (err: any) {
+    console.error("GET Error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
-
-  return NextResponse.json(rows[0]);
 }
 
 // ================================
 // PUT /api/schools/:id
-// Supports text fields + file uploads
+// Supports FormData with file uploads
 // ================================
 export async function PUT(
   req: NextRequest,
@@ -37,88 +42,89 @@ export async function PUT(
   try {
     const { id } = await context.params;
 
-    // Check if request is formData (file upload)
-    let formData;
-    try {
-      formData = await req.formData();
-    } catch {
-      formData = null;
+    // Check if school exists
+    const existingSchool = await pool.query(
+      `SELECT * FROM "School" WHERE school_id = $1`,
+      [id]
+    );
+
+    if (existingSchool.rows.length === 0) {
+      return NextResponse.json({ error: "School not found" }, { status: 404 });
     }
 
-    // ---------------------------------------
-    // CASE 1: JSON update (simple PUT)
-    // ---------------------------------------
-    if (!formData) {
-      const updates = await req.json();
-      const fields = Object.keys(updates);
-      const values = Object.values(updates);
+    const formData = await req.formData();
 
-      if (fields.length === 0)
-        return NextResponse.json({ message: "No fields to update" });
+    // Extract text fields
+    const fields = {
+      school_name: formData.get("school_name") as string,
+      school_email: formData.get("school_email") as string,
+      school_phone: formData.get("school_phone") as string,
+      school_type: formData.get("school_type") as string,
+      district: formData.get("district") as string,
+      province: formData.get("province") as string,
+      number_of_students: formData.get("number_of_students") as string,
+      number_of_teachers: formData.get("number_of_teachers") as string,
+      subscription: formData.get("subscription") as string,
+      subscription_year: formData.get("subscription_year") as string,
+      level: formData.get("level") as string,
+      cell: formData.get("cell") as string,
+      sector: formData.get("sector") as string,
+      village: formData.get("village") as string,
+      registration_date: formData.get("registration_date") as string,
+      headmaster_name: formData.get("headmaster_name") as string,
+      headmaster_email: formData.get("headmaster_email") as string,
+      headmaster_phone: formData.get("headmaster_phone") as string,
+      reject_message: formData.get("reject_message") as string || null,
+    };
 
-      const setString = fields
-        .map((f, i) => `"${f}" = $${i + 1}`)
-        .join(", ");
+    // Update school text fields
+    await pool.query(
+      `UPDATE "School" SET
+        school_name = $1,
+        school_email = $2,
+        school_phone = $3,
+        school_type = $4,
+        district = $5,
+        province = $6,
+        number_of_students = $7,
+        number_of_teachers = $8,
+        subscription = $9,
+        subscription_year = $10,
+        level = $11,
+        cell = $12,
+        sector = $13,
+        village = $14,
+        registration_date = $15,
+        headmaster_name = $16,
+        headmaster_email = $17,
+        headmaster_phone = $18,
+        reject_message = $19
+      WHERE school_id = $20`,
+      [
+        fields.school_name,
+        fields.school_email,
+        fields.school_phone,
+        fields.school_type,
+        fields.district,
+        fields.province,
+        fields.number_of_students,
+        fields.number_of_teachers,
+        fields.subscription,
+        fields.subscription_year,
+        fields.level,
+        fields.cell,
+        fields.sector,
+        fields.village,
+        fields.registration_date,
+        fields.headmaster_name,
+        fields.headmaster_email,
+        fields.headmaster_phone,
+        fields.reject_message,
+        id,
+      ]
+    );
 
-      const { rows } = await pool.query(
-        `UPDATE "School" SET ${setString} WHERE school_id = $${fields.length + 1} RETURNING *`,
-        [...values, id]
-      );
-
-      if (!rows.length)
-        return NextResponse.json({ error: "School not found" }, { status: 404 });
-
-      return NextResponse.json(rows[0]);
-    }
-
-    // ---------------------------------------
-    // CASE 2: form-data update (with files)
-    // ---------------------------------------
-
-    const allowedFields = [
-      "school_name",
-      "school_email",
-      "school_phone",
-      "school_type",
-      "district",
-      "province",
-      "number_of_students",
-      "number_of_teachers",
-      "subscription_year",
-      "level",
-      "cell",
-      "sector",
-      "village",
-      "registration_date",
-      "headmaster_name",
-      "headmaster_email",
-      "headmaster_phone",
-      "rejectMessage"
-    ];
-
-    const textUpdates: any = {};
-
-    for (const f of allowedFields) {
-      const v = formData.get(f);
-      if (v !== null && v !== undefined && v !== "") textUpdates[f] = v;
-    }
-
-    // Update TEXT FIELDS
-    if (Object.keys(textUpdates).length > 0) {
-      const fields = Object.keys(textUpdates);
-      const values = Object.values(textUpdates);
-
-      const setString = fields
-        .map((f, i) => `"${f}" = $${i + 1}`)
-        .join(", ");
-
-      await pool.query(
-        `UPDATE "School" SET ${setString} WHERE school_id = $${fields.length + 1}`,
-        [...values, id]
-      );
-    }
-
-    // Update FILES
+    // Handle file uploads and update Document table
     const fileFields = [
       { key: "registration_certificate", type: "registration_certificate" },
       { key: "payment_proof", type: "payment_proof" },
@@ -130,12 +136,14 @@ export async function PUT(
 
     for (const fileField of fileFields) {
       const file = formData.get(fileField.key) as Blob | null;
-      if (!file) continue;
+      
+      // Skip if no file or if file is empty
+      if (!file || file.size === 0) continue;
 
-      // Upload new file
-      const uploaded = await uploadSingleFileCloud(file);
+      // Upload new file to Cloudinary
+      const uploaded: UploadedFile = await uploadSingleFileCloud(file);
 
-      // Check if that document type exists for this school
+      // Check if document already exists for this school
       const existing = await pool.query(
         `SELECT * FROM "Document" WHERE school_id = $1 AND type = $2`,
         [id, fileField.type]
@@ -145,17 +153,17 @@ export async function PUT(
         // Update existing document
         const updated = await pool.query(
           `UPDATE "Document"
-           SET file = $1
+           SET file = $1, updated_at = NOW()
            WHERE school_id = $2 AND type = $3
            RETURNING *`,
           [uploaded.url, id, fileField.type]
         );
         updatedDocuments.push(updated.rows[0]);
       } else {
-        // Create new document
+        // Insert new document
         const inserted = await pool.query(
-          `INSERT INTO "Document" (document_id, school_id, type, file)
-           VALUES ($1, $2, $3, $4)
+          `INSERT INTO "Document" (document_id, school_id, type, file, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, NOW(), NOW())
            RETURNING *`,
           [uuidv4(), id, fileField.type, uploaded.url]
         );
@@ -163,13 +171,19 @@ export async function PUT(
       }
     }
 
+    // Fetch and return updated school
+    const { rows } = await pool.query(
+      `SELECT * FROM "School" WHERE school_id = $1`,
+      [id]
+    );
+
     return NextResponse.json({
       message: "School updated successfully",
-      updated_fields: textUpdates,
+      school: rows[0],
       updated_documents: updatedDocuments,
     });
   } catch (err: any) {
-    console.error("ERROR UPDATING SCHOOL:", err);
+    console.error("PUT Error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
@@ -181,17 +195,28 @@ export async function DELETE(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params;
+  try {
+    const { id } = await context.params;
 
-  await pool.query(`DELETE FROM "Document" WHERE school_id = $1`, [id]);
+    // Delete associated documents first
+    await pool.query(`DELETE FROM "Document" WHERE school_id = $1`, [id]);
 
-  const { rows } = await pool.query(
-    `DELETE FROM "School" WHERE school_id = $1 RETURNING *`,
-    [id]
-  );
+    // Delete the school
+    const { rows } = await pool.query(
+      `DELETE FROM "School" WHERE school_id = $1 RETURNING *`,
+      [id]
+    );
 
-  if (rows.length === 0)
-    return NextResponse.json({ error: "School not found" }, { status: 404 });
+    if (rows.length === 0) {
+      return NextResponse.json({ error: "School not found" }, { status: 404 });
+    }
 
-  return NextResponse.json({ message: "School deleted successfully" });
+    return NextResponse.json({ 
+      message: "School deleted successfully",
+      deleted_school: rows[0]
+    });
+  } catch (err: any) {
+    console.error("DELETE Error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import  Navbar  from '@/components/onboard/Navbar';
+import  Navbar  from '@/components/compliance/Navbar';
 import { SchoolsTable } from '@/components/onboard/SchoolsTable';
 import { ComplianceViewModal } from '@/components/compliance/ComplianceViewModel';
 import { School } from '@/types';
@@ -18,7 +18,7 @@ export default function ComplianceDashboard({ onLogout }: ComplianceDashboardPro
 
   const fetchPendingSchools = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/schools?status=Pending Approval");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools?status=PENDING`);
       const data = await res.json();
       setSchools(data);
     } catch (error) {
@@ -31,19 +31,19 @@ export default function ComplianceDashboard({ onLogout }: ComplianceDashboardPro
   }, []);
 
   const handleApprove = async(schoolId: string) => {
-    await fetch(`http://localhost:5000/api/schools/${schoolId}/status`, {
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools/${schoolId}/status`, {
       method: "PATCH",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({status: "Approved"}),
+      body: JSON.stringify({status: "APPROVED"}),
     });
     fetchPendingSchools();
   };
 
   const handleReject = async (schoolId: string, reason: string) => {
-    await fetch(`http://localhost:5000/api/schools/${schoolId}/status`, {
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools/${schoolId}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Rejected", rejectionReason: reason }),
+      body: JSON.stringify({ status: "REJECTED", rejectionReason: reason }),
     });
     fetchPendingSchools();
   };

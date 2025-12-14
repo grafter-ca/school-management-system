@@ -1,56 +1,65 @@
 import { Resend } from "resend";
 
-// Safe initialization: does NOT break build if the API key is missing
+// Safe initialization
 const apiKey = process.env.RESEND_API_KEY;
-
-// If no API key, we avoid calling Resend()
 const resend = apiKey ? new Resend(apiKey) : null;
 
+/**
+ * Sends an approval request email
+ */
 export async function sendApprovalRequest(
   schoolName: string,
   schoolId: string
 ) {
-  // If there is NO Resend key → skip email but do not crash the app
+  // If no API key, skip email but do NOT crash
   if (!resend) {
-    console.warn("⚠ RESEND_API_KEY is missing — email NOT sent, but build continues.");
+    console.warn("⚠ RESEND_API_KEY missing — email NOT sent.");
     return {
       success: false,
-      message: "Email skipped (no API key provided)."
+      message: "Email skipped due to missing API key.",
     };
   }
 
-  // Send email via Resend
-    const complianceEmail = process.env.COMPLIENCE_EMAIL || "caleb.designer1@gmail.com";
+  // If user has verified a custom domain → use it
+  const verifiedSender = process.env.RESEND_FROM_EMAIL || "sandbox@resend.dev";
 
   try {
     const data = await resend.emails.send({
-      from: "sandbox@resend.dev",
-      to:complianceEmail,
-      subject: `Approval Request: ${schoolName}`,
+      from: verifiedSender,
+      to,
+      subject: `Approval Request for ${schoolName}`,
       html: `
         <h2>New School Registration Pending Approval</h2>
+
+        <p>A new school has submitted a registration request.</p>
+
         <p><b>School Name:</b> ${schoolName}</p>
         <p><b>School ID:</b> ${schoolId}</p>
-        <p>Please login to the system to approve or reject this submission.</p>
 
-        <a href="${process.env.NEXT_PUBLIC_APP_URL}/compliance" 
+        <p>Please log in to review the submission:</p>
+
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/compliance"
           style="
             display: inline-block;
-            padding: 10px 15px;
-            background-color: #4CAF50;
+            padding: 10px 16px;
+            background-color: #0066ff;
             color: white;
             text-decoration: none;
-            border-radius: 5px;
-          ">
-          Go to Compliance Dashboard
+            border-radius: 6px;
+          "
+        >
+          Open Compliance Dashboard
         </a>
+
+        <br/><br/>
+        <p>If you did not expect this email, please ignore it.</p>
       `,
     });
 
-    console.log("Email sent via Resend:", data);
-    return data;
+    console.log("📧 Email sent:", data);
+    return { success: true, data };
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("❌ Email sending failed:", error);
     return { success: false, error };
   }
 }

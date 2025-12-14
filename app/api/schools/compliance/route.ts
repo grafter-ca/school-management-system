@@ -26,9 +26,7 @@ export async function PATCH(req: NextRequest) {
         { status: 404 }
       );
     }
-
     const school = rows[0];
-
     // -----------------------------------
     // 2. REQUIRED fields for compliance
     // -----------------------------------
@@ -49,7 +47,6 @@ export async function PATCH(req: NextRequest) {
     const missingFields = requiredFields.filter(
       (field) => !school[field] || school[field] === ""
     );
-
     // -----------------------------------
     // 3. If missing fields → reject
     // -----------------------------------
@@ -65,7 +62,7 @@ export async function PATCH(req: NextRequest) {
       );
 
       return NextResponse.json({
-        status: "Rejected",
+        status: "REJECTED",
         reason: message,
       });
     }
@@ -74,13 +71,13 @@ export async function PATCH(req: NextRequest) {
     // -----------------------------------
     await pool.query(
       `UPDATE "School" 
-       SET status = 'Approved', rejectMessage = NULL 
+       SET status = 'APPROVED', rejectMessage = NULL 
        WHERE id = $1`,
       [id]
     );
 
     return NextResponse.json({
-      status: "Approved",
+      status: "APPROVED",
       message: "School successfully approved by compliance team",
     });
 

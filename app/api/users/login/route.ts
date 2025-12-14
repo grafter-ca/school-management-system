@@ -43,7 +43,6 @@ export async function POST(req: NextRequest) {
       name: user.name,
       email: user.email,
       sms_role: user.sms_role,
-      token:token,
     },
     token
   });
@@ -55,7 +54,7 @@ export async function POST(req: NextRequest) {
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 60 * 60 * 24, // 1 day
-    sameSite: "strict",
+    sameSite: "lax",
   });
 
   return response;
