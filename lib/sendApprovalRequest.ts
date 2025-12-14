@@ -7,7 +7,6 @@ const apiKey = process.env.RESEND_API_KEY;
 const resend = apiKey ? new Resend(apiKey) : null;
 
 export async function sendApprovalRequest(
-  to: string,
   schoolName: string,
   schoolId: string
 ) {
@@ -20,10 +19,13 @@ export async function sendApprovalRequest(
     };
   }
 
+  // Send email via Resend
+    const complianceEmail = process.env.COMPLIENCE_EMAIL || "caleb.designer1@gmail.com";
+
   try {
     const data = await resend.emails.send({
       from: "sandbox@resend.dev",
-      to,
+      to:complianceEmail,
       subject: `Approval Request: ${schoolName}`,
       html: `
         <h2>New School Registration Pending Approval</h2>
@@ -31,7 +33,7 @@ export async function sendApprovalRequest(
         <p><b>School ID:</b> ${schoolId}</p>
         <p>Please login to the system to approve or reject this submission.</p>
 
-        <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/compliance" 
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/compliance" 
           style="
             display: inline-block;
             padding: 10px 15px;

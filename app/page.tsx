@@ -14,7 +14,7 @@ console.log("Api url", process.env.NEXT_PUBLIC_APP_URL)
     console.log('Logging in:', email, password);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/users/login`, {
+      const res = await fetch('/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

@@ -12,8 +12,12 @@ import { Search, Filter } from 'lucide-react';
 interface DashboardProps {
   onLogout: () => void;
 }
+// api uri
+const API_URI = "https://school-management-system-indol.vercel.app/api"
 
 export default function Dashboard({ onLogout }: DashboardProps) {
+  
+
   const [schools, setSchools] = useState<School[]>([]);
   
   const [showAddForm, setShowAddForm] = useState(false);
@@ -28,7 +32,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 
   const fetchSchools = async () => {
     try {
-      const res = await fetch('')
+      const res = await fetch(`${API_URI}/schools`)
       const data = await res.json();
       setSchools(data);
     } catch (error) {
@@ -51,7 +55,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
       status: 'Draft',
       registrationDate: new Date().toISOString().split('T')[0],
     };
-    await fetch('', {
+    await fetch(`${API_URI}/schools`, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body:JSON.stringify(newSchool)
@@ -71,7 +75,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 
   const handleUpdateSchool = async (updatedSchool: Omit<School, 'id' | 'status' | 'registrationDate'>) => {
     if (editingSchool) {
-      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools/${editingSchool.id}`, {
+      await fetch(`${API_URI}/schools/${editingSchool.id}`, {
         method: "PUT",
         headers: {"content-type": "application/json"},
         body: JSON.stringify(updatedSchool)
@@ -84,7 +88,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
   };
 
   const handleRequestApproval = async (schoolId: string) => {
-   await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/schools/request-approval`, {
+   await fetch(`${API_URI}/schools/request-approval`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "Pending Approval" }),
@@ -133,7 +137,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
               </div>
               <button
                 onClick={() => setShowAddForm(true)}
-                className="bg-linear-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl"
+                className="bg-linear-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl animate-bounce"
               >
                 Add New School
               </button>

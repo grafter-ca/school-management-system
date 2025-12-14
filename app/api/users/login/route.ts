@@ -5,6 +5,7 @@ import { comparePassword } from "@/lib/auth";
 import { signToken } from "@/lib/jwt";
 
 export async function POST(req: NextRequest) {
+  try{
   const { email, password } = await req.json();
 
   // Get user by email
@@ -58,4 +59,12 @@ export async function POST(req: NextRequest) {
   });
 
   return response;
+} catch(error:any) {
+   console.error("🔥 LOGIN API ERROR:", error);  // ✅ ADDED
+    return NextResponse.json(
+      { error: "Server error", details: error.message },  // ✅ ADDED
+      { status: 500 }
+    );
+
+}
 }

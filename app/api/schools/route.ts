@@ -6,7 +6,6 @@ import {
   uploadSingleFileCloud,
   UploadedFile,
 } from "@/middleware/uploadSingleCloud";
-
 // Disable Next.js body parser for FormData
 export const config = { api: { bodyParser: false } };
 
@@ -24,16 +23,16 @@ export async function GET() {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
-
 // -----------------------------
 // CREATE SCHOOL + UPLOAD FILES
 // -----------------------------
 export async function POST(req: NextRequest) {
+
   try {
     const formData = await req.formData();
     const school_id = uuidv4();
 
-    // Extract all the text fields
+    //Extract all the text fields
     const fields = {
       school_name: formData.get("school_name") as string,
       school_email: formData.get("school_email") as string,
@@ -119,11 +118,11 @@ export async function POST(req: NextRequest) {
         fields.headmaster_name,
         fields.headmaster_email,
         fields.headmaster_phone,
+        fields.reject_message,
         fileUploads.registration_certificate,
         fileUploads.payment_proof,
         fileUploads.invoice,
         fileUploads.other_documents,
-        fileUploads.reject_message,
       ]
     );
 
