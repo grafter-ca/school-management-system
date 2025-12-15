@@ -24,6 +24,7 @@ export async function sendApprovalRequest(
   const verifiedSender = process.env.RESEND_FROM_EMAIL || "sandbox@resend.dev";
 
   try {
+    const to = process.env.ADMIN_EMAIL || "admin@example.com"; // Replace with the actual recipient email
     const data = await resend.emails.send({
       from: verifiedSender,
       to,

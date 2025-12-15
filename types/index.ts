@@ -6,12 +6,15 @@ export interface School {
   school_name: string;
   school_email: string;
   school_phone: string;
+  status: SchoolStatus;
+  isActive: boolean;
   level: string;
   school_type: string;
   number_of_students?: number;
   number_of_teachers?: number;
   subscription: string;
   subscription_year?: string;
+  activation_date: string;
   province: string;
   district?: string;
   sector: string;
@@ -28,7 +31,6 @@ export interface School {
   other_documents?: File | string | null;
   // Metadata
   registration_date: string;
-  status: SchoolStatus;
   rejection_reason?: string;
   reject_message?: string;
   created_at?: string;
@@ -45,4 +47,15 @@ export interface LocationData {
   };
 }
 
-export type UserRole = 'onboarding' | 'compliance';
+export type UserRole = 'onboarding' | 'compliance' | 'admin' | 'superadmin';
+
+export interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  role: 'onboarding' | 'compliance' | 'admin';
+  status: 'Active' | 'Inactive';
+  createdDate: string;
+  createdBy?: string;
+}
