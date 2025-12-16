@@ -11,11 +11,11 @@ interface CreateAdminModalProps {
 
 export function CreateAdminModal({ onClose, onSubmit }: CreateAdminModalProps) {
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     phone: '',
-    role: 'admin' as 'admin',
-    status: 'Active' as 'Active' | 'Inactive',
+    role: 'onboarding',
+    status: 'InActive',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -31,8 +31,8 @@ export function CreateAdminModal({ onClose, onSubmit }: CreateAdminModalProps) {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
+    if (!formData.name.trim()) {
+      newErrors.name = 'Full name is required';
     }
 
     if (!formData.email.trim()) {
@@ -95,15 +95,15 @@ export function CreateAdminModal({ onClose, onSubmit }: CreateAdminModalProps) {
             </label>
             <input
               type="text"
-              value={formData.fullName}
-              onChange={(e) => handleChange('fullName', e.target.value)}
+              value={formData.name}
+              onChange={(e) => handleChange('name', e.target.value)}
               placeholder="Enter full name"
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none ${
-                errors.fullName ? 'border-red-500' : 'border-gray-300'
+                errors.name ? 'border-red-500' : 'border-gray-300'
               }`}
             />
-            {errors.fullName && (
-              <p className="text-red-600 mt-1">{errors.fullName}</p>
+            {errors.name && (
+              <p className="text-red-600 mt-1">{errors.name}</p>
             )}
           </div>
 

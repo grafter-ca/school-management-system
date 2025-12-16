@@ -19,7 +19,6 @@ export function middleware(request: NextRequest) {
 
   return NextResponse.next();
 }
-
 // Define which paths the middleware applies to
 export const config = {
   matcher: ["/onboard/:path*", "/compliance/:path*"],  

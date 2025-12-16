@@ -51,11 +51,10 @@ export type UserRole = 'onboarding' | 'compliance' | 'admin' | 'superadmin';
 
 export interface User {
   id: string;
-  fullName: string;
+  name: string;
   email: string;
   phone: string;
-  role: 'onboarding' | 'compliance' | 'admin';
-  status: 'Active' | 'Inactive';
+  role: string;
+  status: string;
   createdDate: string;
-  createdBy?: string;
 }
