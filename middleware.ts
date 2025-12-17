@@ -21,5 +21,5 @@ export function middleware(request: NextRequest) {
 }
 // Define which paths the middleware applies to
 export const config = {
-  matcher: ["/onboard/:path*", "/compliance/:path*"],  
+  matcher: ["/onboard/:path*","/admin/:path*","/superadmin/:path*", "/compliance/:path*"],  
 };
