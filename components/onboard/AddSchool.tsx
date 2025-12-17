@@ -79,6 +79,8 @@ export default function AddSchool() {
         payment_proof: formData.get('payment_proof') as File || editingSchool.payment_proof,
         invoice: formData.get('invoice') as File || editingSchool.invoice,
         other_documents: formData.get('other_documents') as File || editingSchool.other_documents,
+        isActive: editingSchool.isActive,
+        activation_date: editingSchool.activation_date
       };
 
       setSchools(schools.map(s => s.id === editingSchool.id ? updatedSchool : s));

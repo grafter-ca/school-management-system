@@ -9,33 +9,30 @@ export function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([
     {
       id: 'USR-001',
-      fullName: 'John Kamali',
+      name: 'John Kamali',
       email: 'john.kamali@school.edu',
       phone: '+250788111222',
       role: 'onboarding',
       status: 'Active',
       createdDate: '2025-01-10',
-      createdBy: 'Admin',
     },
     {
       id: 'USR-002',
-      fullName: 'Marie Uwase',
+      name: 'Marie Uwase',
       email: 'marie.uwase@school.edu',
       phone: '+250788333444',
       role: 'compliance',
       status: 'Active',
       createdDate: '2025-01-12',
-      createdBy: 'Admin',
     },
     {
       id: 'USR-003',
-      fullName: 'Peter Mugisha',
+      name: 'Peter Mugisha',
       email: 'peter.mugisha@school.edu',
       phone: '+250788555666',
       role: 'onboarding',
       status: 'Inactive',
       createdDate: '2025-01-08',
-      createdBy: 'Admin',
     },
   ]);
 
@@ -47,7 +44,6 @@ export function AdminUsersPage() {
       ...userData,
       id: `USR-${String(users.length + 1).padStart(3, '0')}`,
       createdDate: new Date().toISOString().split('T')[0],
-      createdBy: 'Admin',
     };
     setUsers([...users, newUser]);
     setShowCreateModal(false);
@@ -178,7 +174,7 @@ export function AdminUsersPage() {
             <tbody className="divide-y divide-gray-200">
               {users.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-gray-900">{user.fullName}</td>
+                  <td className="px-6 py-4 text-gray-900">{user.name}</td>
                   <td className="px-6 py-4 text-gray-600">{user.email}</td>
                   <td className="px-6 py-4 text-gray-600">{user.phone}</td>
                   <td className="px-6 py-4">

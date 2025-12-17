@@ -93,7 +93,7 @@ export function AdminViewSchoolModal({ school, onClose }: AdminViewSchoolModalPr
                 <Calendar className="w-5 h-5 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-gray-600">Registration Date</p>
-                  <p className="text-gray-900">{new Date(school.registration_date).toLocaleDateString()}</p>
+                  <p className="text-gray-900">{school.registration_date ? new Date(school.registration_date).toLocaleDateString() : 'N/A'}</p>
                 </div>
               </div>
             </div>

@@ -9,46 +9,42 @@ export function SuperAdminUsersPage() {
   const [users] = useState<User[]>([
     {
       id: 'USR-001',
-      fullName: 'John Kamali',
+      name: 'John Kamali',
       email: 'john.kamali@school.edu',
       phone: '+250788111222',
       role: 'onboarding',
       status: 'Active',
       createdDate: '2025-01-10',
-      createdBy: 'Admin',
     },
     {
       id: 'USR-002',
-      fullName: 'Marie Uwase',
+      name: 'Marie Uwase',
       email: 'marie.uwase@school.edu',
       phone: '+250788333444',
       role: 'compliance',
       status: 'Active',
       createdDate: '2025-01-12',
-      createdBy: 'Admin',
     },
     {
       id: 'USR-003',
-      fullName: 'Peter Mugisha',
+      name: 'Peter Mugisha',
       email: 'peter.mugisha@school.edu',
       phone: '+250788555666',
       role: 'onboarding',
       status: 'Inactive',
       createdDate: '2025-01-08',
-      createdBy: 'Admin',
     },
   ]);
 
   const [admins, setAdmins] = useState<User[]>([
     {
       id: 'ADM-001',
-      fullName: 'Sarah Iradukunda',
+      name: 'Sarah Iradukunda',
       email: 'sarah.admin@school.edu',
       phone: '+250788777888',
       role: 'admin',
       status: 'Active',
       createdDate: '2025-01-05',
-      createdBy: 'Super Admin',
     },
   ]);
 
@@ -59,7 +55,6 @@ export function SuperAdminUsersPage() {
       ...adminData,
       id: `ADM-${String(admins.length + 1).padStart(3, '0')}`,
       createdDate: new Date().toISOString().split('T')[0],
-      createdBy: 'Super Admin',
     };
     setAdmins([...admins, newAdmin]);
     setShowCreateAdminModal(false);
@@ -176,7 +171,6 @@ export function SuperAdminUsersPage() {
                   <th className="px-6 py-3 text-left text-gray-700">Phone</th>
                   <th className="px-6 py-3 text-left text-gray-700">Status</th>
                   <th className="px-6 py-3 text-left text-gray-700">Created Date</th>
-                  <th className="px-6 py-3 text-left text-gray-700">Created By</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -185,7 +179,7 @@ export function SuperAdminUsersPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
                         <Shield className="w-5 h-5 text-green-600" />
-                        <span className="text-gray-900">{admin.fullName}</span>
+                        <span className="text-gray-900">{admin.name}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-gray-600">{admin.email}</td>
@@ -204,7 +198,6 @@ export function SuperAdminUsersPage() {
                     <td className="px-6 py-4 text-gray-600">
                       {new Date(admin.createdDate).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{admin.createdBy}</td>
                   </tr>
                 ))}
               </tbody>
@@ -286,7 +279,7 @@ export function SuperAdminUsersPage() {
               <tbody className="divide-y divide-gray-200">
                 {users.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-gray-900">{user.fullName}</td>
+                    <td className="px-6 py-4 text-gray-900">{user.name}</td>
                     <td className="px-6 py-4 text-gray-600">{user.email}</td>
                     <td className="px-6 py-4 text-gray-600">{user.phone}</td>
                     <td className="px-6 py-4">

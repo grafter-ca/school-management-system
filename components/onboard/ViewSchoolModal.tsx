@@ -79,7 +79,7 @@ export function ViewSchoolModal({ school, onClose, onRequestApproval, userRole }
                 <InfoField label="Sector" value={school.sector} />
                 <InfoField label="Cell" value={school.cell} />
                 <InfoField label="Village" value={school.village} />
-                <InfoField label="Registration Date" value={school.registration_date} />
+                <InfoField label="Registration Date" value={school.registration_date ?? 'N/A'} />
               </div>
             </div>
 
@@ -108,7 +108,7 @@ export function ViewSchoolModal({ school, onClose, onRequestApproval, userRole }
             <div>
               <h3 className="text-gray-900 mb-4 pb-2 border-b-2 border-orange-500">Status Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InfoField label="Status" value={school.status} />
+                <InfoField label="Status" value={school.status ?? 'N/A'} />
                 <InfoField label="Created At" value={school.created_at ? new Date(school.created_at).toLocaleDateString() : 'N/A'} />
                 {(school.rejection_reason || school.reject_message) && (
                   <div className="md:col-span-2">

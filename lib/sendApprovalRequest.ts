@@ -22,9 +22,11 @@ export async function sendApprovalRequest(
 
   // If user has verified a custom domain → use it
   const verifiedSender = process.env.RESEND_FROM_EMAIL || "sandbox@resend.dev";
+const complianceEmail = process.env.COMPLIENCE_EMAIL || "callebhabyar55@gmail.com";
+
 
   try {
-    const to = process.env.ADMIN_EMAIL || "admin@example.com"; // Replace with the actual recipient email
+    const to = complianceEmail; // Replace with the actual recipient email
     const data = await resend.emails.send({
       from: verifiedSender,
       to,
